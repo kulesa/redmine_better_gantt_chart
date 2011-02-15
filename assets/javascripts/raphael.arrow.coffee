@@ -1,0 +1,70 @@
+###
+This plugin draws arrows on Redmine gantt chart.
+###
+Raphael.fn.ganttArrow = (x1, y1, x6, y6) -> 
+  line = (x1, y1, x2, y2) -> 
+    ["M", x1, y1, "L", x2, y2]
+
+  triangle = (cx, cy, r) -> 
+    r *= 1.75
+    "M".concat(cx, ",", cy, "m0-", r * .58, "l", r * .5, ",", r * .87, "-", r, ",0z")
+
+  arrow = @set()
+  
+  deltaX = 6
+  deltaY = 8
+  
+  [x2, y2] = [x1 + deltaX, y1]
+  [x5, y5] = [x6 - deltaX, y6]
+  
+  if y1 < y6
+    [x3, y3] = [x2, y6 - deltaY]
+  else
+    [x3, y3] = [x2, y6 + deltaY]
+
+  if x1 + deltaX + 7 < x6
+    [x4, y4] = [x3, y3]
+  else
+    [x4, y4] = [x5, y3]
+  
+  arrow.push @path(line(x1, y1, x2, y2)) 
+  arrow.push @path(line(x2, y2, x3, y3)) 
+  arrow.push @path(line(x3, y3, x4, y4)) 
+  arrow.push @path(line(x4, y4, x5, y5)) 
+  arrow.push @path(line(x5, y6, x6, y6))
+  arrowhead = arrow.push(@path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90))
+  arrow.toFront()
+  return arrow.attr({fill: "#222", stroke: "#222"})
+  
+###
+Draws connection arrows over the gantt chart
+###  
+window.redrawGanttArrows = () ->
+  paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
+  window.paper = paper;
+  
+  # Calculates arrow coordinates
+  calculateAnchors = (from, to) -> 
+    [fromOffsetX, fromOffsetY] = Element.positionedOffset(from)
+    [toOffsetX, toOffsetY]     = Element.positionedOffset(to)
+    if to.hasClassName('parent')
+      typeOffsetX = 9
+    else
+      typeOffsetX = 5
+    [fromOffsetX + from.getWidth(), fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
+
+  console.log "total: #{$$('div.task_todo').size()}"  
+  # Draw arrows for all tasks, which have dependencies
+  $$('div.task_todo').each (element) -> 
+    if (follows = Element.readAttribute(element, 'follows'))
+      for id in follows.split(',')
+        if (item = $(id))
+          [x1, y1, x2, y2] = calculateAnchors(item, element)
+          paper.ganttArrow(x1, y1, x2, y2)
+  
+###
+Fired on full load of the page
+###
+document.observe "dom:loaded", () -> 
+  window.redrawGanttArrows()
+
