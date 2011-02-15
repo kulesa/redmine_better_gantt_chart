@@ -1,6 +1,9 @@
 ###
 This plugin draws arrows on Redmine gantt chart.
 ###
+
+# Draws an arrow 
+# Original here: http://taitems.tumblr.com/post/549973287/drawing-arrows-in-raphaeljs
 Raphael.fn.ganttArrow = (x1, y1, x6, y6) -> 
   line = (x1, y1, x2, y2) -> 
     ["M", x1, y1, "L", x2, y2]
@@ -34,7 +37,7 @@ Raphael.fn.ganttArrow = (x1, y1, x6, y6) ->
   arrow.push @path(line(x5, y6, x6, y6))
   arrowhead = arrow.push(@path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90))
   arrow.toFront()
-  return arrow.attr({fill: "#222", stroke: "#222"})
+  return arrow.attr({fill: "#444", stroke: "#222"})
   
 ###
 Draws connection arrows over the gantt chart
@@ -53,7 +56,6 @@ window.redrawGanttArrows = () ->
       typeOffsetX = 6
     [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
 
-  console.log "total: #{$$('div.task_todo').size()}"  
   # Draw arrows for all tasks, which have dependencies
   $$('div.task_todo').each (element) -> 
     if (follows = Element.readAttribute(element, 'follows'))
@@ -61,10 +63,3 @@ window.redrawGanttArrows = () ->
         if (item = $(id))
           [x1, y1, x2, y2] = calculateAnchors(item, element)
           paper.ganttArrow(x1, y1, x2, y2)
-  
-###
-Fired on full load of the page
-###
-document.observe "dom:loaded", () -> 
-  window.redrawGanttArrows()
-

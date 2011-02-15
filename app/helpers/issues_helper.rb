@@ -35,7 +35,7 @@ module IssuesHelper
     end
     
     unless issue.relations_from.empty?
-      content += "<br />" + issue.relations_to.map do |rel|
+      content += "<br />" + issue.relations_from.map do |rel|
         "<strong>#{@cached_label_precedes}</strong>: #{link_to_issue(rel.issue_to)}"
       end.join("<br />")
     end

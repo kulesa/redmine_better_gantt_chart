@@ -4,14 +4,14 @@ The plugin imroves functionality of Redmine Gantt Chart.
 
 == Features
 
-- Now issues on Gantt chart are connected with arrows. Handy!
+- Issues on Gantt chart connected with arrows. Handy!
 - Relations info added to issue tooltip.
 - Fixed rescheduling of related tasks if due date of dependent task changed to an earlier date.
 
 == Installation and Setup
 
 1. Go to your #{RAILS_ROOT}/vendor/plugins directory
-2. Run 'git clone https://github.com/kulesa/redmine_gantt.git'
+2. Run 'git clone git://github.com/kulesa/redmine_gantt.git'
 3. Restart Redmine
 
 You should now see the plugin in *Administration* -> *Plugins*. The plugin does not require any database migrations.
@@ -27,13 +27,13 @@ Connection arrows are rendered in SVG via {Raphael.js}[http://raphaeljs.com/] li
 
 == Problems and Limitations
 
-- you might notice that connection arrows are somewhat of less visible over the weekend bars. That's because SVG is rendered behind divs which have a background. To workaround this I just set opaque=0.7 for all such divs. 
-Let me know if you have a better solution!  
-- rescheduling of multiple related issues not always work as expected; you might need to open an issue which was not rescheduled and save changes manually. 
+- Currently only '*follows*' and '*precedes*' relations are used to calculate schedule of dependend issues. Other relation types are rendered on the chart, but they *do* *not* *change* schedule of related issues. 
+- Only 'finish-to-start' dependency type is available.
+- One issue can precede many issues but, can be preceeded with only one issue. 
 
 == Helping out
 
-If you notice any problems, please report them to the GitHub issue tracker {here}[https://github.com/kulesa/redmine_gantt/issues] Feel free to contact me via GitHub or Twitter 
+If you notice any problems, please report them to the GitHub issue tracker {here}[https://github.com/kulesa/redmine_gantt/issues]. Feel free to contact me via GitHub or Twitter 
 or whatever with any other questions or feature requests. To submit changes fork the project and send a pull request.
 
 == License

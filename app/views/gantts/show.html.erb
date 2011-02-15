@@ -92,7 +92,7 @@ t_height = g_height + headers_height
 <td>
 
 <div style="position:relative;height:<%= t_height + 24 %>px; overflow:auto;">
-<div id="gantt_lines" style="position:relative; height: 100%; width:2048px; margin-right: -2048px;"></div>
+
 <div style="width:<%= g_width-1 %>px;height:<%= headers_height %>px;background: #eee;" class="gantt_hdr">&nbsp;</div>
 <% 
 #
@@ -174,7 +174,7 @@ end %>
 if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
     <div style="position: absolute;height:<%= g_height %>px;top:<%= headers_height + 1 %>px;left:<%= ((Date.today-@gantt.date_from+1)*zoom).floor()-1 %>px;width:10px;border-left: 1px dashed red;">&nbsp;</div>
 <% end %>
-
+<div id="gantt_lines" style="position:relative; height: 100%; width:2048px; margin-right: -2048px;"></div>
 </div>
 </td>
 </tr>

@@ -33,7 +33,7 @@
     arrowhead = arrow.push(this.path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90));
     arrow.toFront();
     return arrow.attr({
-      fill: "#222",
+      fill: "#444",
       stroke: "#222"
     });
   };
@@ -55,7 +55,6 @@
       }
       return [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
     };
-    console.log("total: " + ($$('div.task_todo').size()));
     return $$('div.task_todo').each(function(element) {
       var follows, id, item, x1, x2, y1, y2, _i, _len, _ref, _ref2, _results;
       if ((follows = Element.readAttribute(element, 'follows'))) {
@@ -69,10 +68,4 @@
       }
     });
   };
-  /*
-  Fired on full load of the page
-  */
-  document.observe("dom:loaded", function() {
-    return window.redrawGanttArrows();
-  });
 }).call(this);
