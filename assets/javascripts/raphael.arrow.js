@@ -49,11 +49,11 @@
       _ref = Element.positionedOffset(from), fromOffsetX = _ref[0], fromOffsetY = _ref[1];
       _ref2 = Element.positionedOffset(to), toOffsetX = _ref2[0], toOffsetY = _ref2[1];
       if (to.hasClassName('parent')) {
-        typeOffsetX = 9;
+        typeOffsetX = 10;
       } else {
-        typeOffsetX = 5;
+        typeOffsetX = 6;
       }
-      return [fromOffsetX + from.getWidth(), fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
+      return [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
     };
     console.log("total: " + ($$('div.task_todo').size()));
     return $$('div.task_todo').each(function(element) {

@@ -1,4 +1,4 @@
-module RedmineIssueDependency
+module RedmineBetterGanttChart
   module GanttHelperPatch
     def self.included(base) # :nodoc:
       base.send(:include, InstanceMethods)

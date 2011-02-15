@@ -48,10 +48,10 @@ window.redrawGanttArrows = () ->
     [fromOffsetX, fromOffsetY] = Element.positionedOffset(from)
     [toOffsetX, toOffsetY]     = Element.positionedOffset(to)
     if to.hasClassName('parent')
-      typeOffsetX = 9
+      typeOffsetX = 10
     else
-      typeOffsetX = 5
-    [fromOffsetX + from.getWidth(), fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
+      typeOffsetX = 6
+    [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
 
   console.log "total: #{$$('div.task_todo').size()}"  
   # Draw arrows for all tasks, which have dependencies

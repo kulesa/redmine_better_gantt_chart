@@ -1,4 +1,4 @@
-module RedmineIssueDependency
+module RedmineBetterGanttChart
   module IssueDependencyPatch
     def self.included(base) # :nodoc:
       base.send(:include, InstanceMethods)
@@ -10,7 +10,8 @@ module RedmineIssueDependency
   
     module InstanceMethods
       # Extends behavior of reschedule_after method to also handle
-      # cases where start_date > date, that is, when due date of the previous task decreased 
+      # cases where start_date > date, that is, when due date of the previous task
+      # is changed for an earlier date. 
       def reschedule_after_with_earlier_date(date)      
         return if date.nil?
         if leaf?
