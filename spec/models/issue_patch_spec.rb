@@ -2,10 +2,6 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 describe 'Issue Dependency Patch' do 
 
-  before(:all) do 
-    Issue.included_modules.should include(RedmineBetterGanttChart::IssueDependencyPatch)
-  end
-  
   before(:each) do 
     @tracker = Factory(:tracker)
     @project = Factory(:project)
