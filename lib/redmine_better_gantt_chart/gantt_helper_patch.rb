@@ -9,7 +9,7 @@ module RedmineBetterGanttChart
     end
   
     module InstanceMethods
-      # Adds task div ids and 'follows' attribute, which contains list of related tasks
+      # Adds task div ids and relation attribute attribute, which contains list of related tasks
       def html_task_with_arrows(params, coords, options={})
         output = ''
         # Renders the task bar, with progress and late
@@ -17,15 +17,17 @@ module RedmineBetterGanttChart
         if options[:issue]
           issue = options[:issue]          
           issue_id = "#{issue.id}"          
-          issue_follows = issue.relations_to.map do |r|
-            r.issue_from_id
-          end.join(",")
-          issue_follows = " follows='#{issue_follows}' " unless issue_follows.empty?
+          relations = {}
+          issue.relations_to.each do |relation|
+            relation_type = relation.relation_type_for(relation.issue_to) 
+            (relations[relation_type] ||= []) << relation.issue_from_id
+          end
+          issue_relations = relations.inject("") {|str,rel| str << " #{rel[0]}='#{rel[1].join(',')}'" }
         end
         
         if coords[:bar_start] && coords[:bar_end]
           if options[:issue]
-            output << "<div id='#{issue_id}'#{issue_follows}style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
+            output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           else
             output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"            
           end

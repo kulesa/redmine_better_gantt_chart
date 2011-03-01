@@ -1,8 +1,17 @@
 (function() {
   /*
   This plugin draws arrows on Redmine gantt chart.
-  */  Raphael.fn.ganttArrow = function(x1, y1, x6, y6) {
-    var arrow, arrowhead, deltaX, deltaY, line, triangle, x2, x3, x4, x5, y2, y3, y4, y5, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+  */  Raphael.fn.ganttArrow = function(x1, y1, x6, y6, relationType) {
+    var arrow, arrowhead, deltaX, deltaY, line, relationDash, triangle, x2, x3, x4, x5, y2, y3, y4, y5, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+    if (relationType == null) {
+      relationType = "follows";
+    }
+    relationDash = {
+      "follows": "",
+      "duplicated": "- ",
+      "blocked": "-",
+      "relates": "."
+    };
     line = function(x1, y1, x2, y2) {
       return ["M", x1, y1, "L", x2, y2];
     };
@@ -34,16 +43,18 @@
     arrow.toFront();
     return arrow.attr({
       fill: "#444",
-      stroke: "#222"
+      stroke: "#222",
+      "stroke-dasharray": relationDash[relationType]
     });
   };
   /*
   Draws connection arrows over the gantt chart
   */
   window.redrawGanttArrows = function() {
-    var calculateAnchors, paper;
+    var calculateAnchors, paper, relationAttrs;
     paper = Raphael("gantt_lines", "100%", "100%");
     window.paper = paper;
+    relationAttrs = ["follows", "blocked", "duplicated", "relates"];
     calculateAnchors = function(from, to) {
       var fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref2;
       _ref = Element.positionedOffset(from), fromOffsetX = _ref[0], fromOffsetY = _ref[1];
@@ -56,16 +67,24 @@
       return [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
     };
     return $$('div.task_todo').each(function(element) {
-      var follows, id, item, x1, x2, y1, y2, _i, _len, _ref, _ref2, _results;
-      if ((follows = Element.readAttribute(element, 'follows'))) {
-        _ref = follows.split(',');
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          id = _ref[_i];
-          _results.push((item = $(id)) ? ((_ref2 = calculateAnchors(item, element), x1 = _ref2[0], y1 = _ref2[1], x2 = _ref2[2], y2 = _ref2[3], _ref2), paper.ganttArrow(x1, y1, x2, y2)) : void 0);
-        }
-        return _results;
+      var id, item, related, relationAttribute, x1, x2, y1, y2, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = relationAttrs.length; _i < _len; _i++) {
+        relationAttribute = relationAttrs[_i];
+        _results.push((function() {
+          var _i, _len, _ref, _ref2, _results;
+          if ((related = Element.readAttribute(element, relationAttribute))) {
+            _ref = related.split(',');
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              id = _ref[_i];
+              _results.push((item = $(id)) ? ((_ref2 = calculateAnchors(item, element), x1 = _ref2[0], y1 = _ref2[1], x2 = _ref2[2], y2 = _ref2[3], _ref2), paper.ganttArrow(x1, y1, x2, y2, relationAttribute)) : void 0);
+            }
+            return _results;
+          }
+        })());
       }
+      return _results;
     });
   };
 }).call(this);

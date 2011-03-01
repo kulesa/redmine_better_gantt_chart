@@ -10,10 +10,30 @@ describe GanttsController, '#show' do
     
     @start_date = Time.new()
     start_date, due_date = @start_date, @start_date + 3.days
-    @first_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @second_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date)
-    @first_issue.relations << IssueRelation.create!(:issue_from => @first_issue, :issue_to => @second_issue, :relation_type => "precedes", :delay => 0)
-    @first_issue.save!
+    
+    # Precedes - Follows
+    @preceding_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @following_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date)
+    @preceding_issue.relations << IssueRelation.create!(:issue_from => @preceding_issue, :issue_to => @following_issue, :relation_type => "precedes", :delay => 0)
+    @preceding_issue.save!
+    
+    # Blocks - Blocked
+    @blocks_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @blocked_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @blocks_issue.relations << IssueRelation.create!(:issue_from => @blocks_issue, :issue_to => @blocked_issue, :relation_type => "blocks", :delay => 0)
+    @blocks_issue.save!
+
+    # Duplicates - Duplicated
+    @duplicates_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @duplicated_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @duplicates_issue.relations << IssueRelation.create!(:issue_from => @duplicates_issue, :issue_to => @duplicated_issue, :relation_type => "duplicates", :delay => 0)
+    @duplicates_issue.save!
+
+    # Relates
+    @one_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @other_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
+    @one_issue.relations << IssueRelation.create!(:issue_from => @one_issue, :issue_to => @other_issue, :relation_type => "relates", :delay => 0)
+    @one_issue.save!
   end
   
   before(:each) do
@@ -37,10 +57,45 @@ describe GanttsController, '#show' do
     response.should have_text(/raphael.arrow.js/)
   end
   
-  it 'should insert issue ids and follow tags to issue bars' do
+  it 'should insert issue ids and follow tags' do
     get :show
-    response.should have_text(/div id='#{@first_issue.id}'/)
-    response.should have_text(/div id='#{@second_issue.id}' follows='#{@first_issue.id}'/)
+    response.should have_text(/div id='#{@preceding_issue.id}'/)
+    response.should have_text(/div id='#{@following_issue.id}' follows='#{@preceding_issue.id}'/)
   end
   
+  it 'should insert blocked tags' do
+    get :show
+    response.should have_text(/div id='#{@blocks_issue.id}'/)
+    response.should have_text(/div id='#{@blocked_issue.id}' blocked='#{@blocks_issue.id}'/)
+  end
+  
+  it 'should insert duplicated tags' do
+    get :show
+    response.should have_text(/div id='#{@duplicates_issue.id}'/)
+    response.should have_text(/div id='#{@duplicated_issue.id}' duplicated='#{@duplicates_issue.id}'/)
+  end
+  
+  it 'should insert relates tags' do
+    get :show
+    response.should have_text(/div id='#{@one_issue.id}'/)
+    response.should have_text(/div id='#{@other_issue.id}' relates='#{@one_issue.id}'/)
+  end
+  
+  it 'should insert an array of ids to a tag' do
+    @blocks_issue.relations << IssueRelation.create!(:issue_from => @blocks_issue, :issue_to => @duplicated_issue, :relation_type => "duplicates", :delay => 0)
+    @blocks_issue.save!
+
+    get :show
+    response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}'/)
+  end
+
+  it 'should mix different relation types' do 
+    @blocks_issue.relations << IssueRelation.create!(:issue_from => @blocks_issue, :issue_to => @duplicated_issue, :relation_type => "duplicates", :delay => 0)
+    @blocks_issue.save!
+    @one_issue.relations << IssueRelation.create!(:issue_from => @one_issue, :issue_to => @duplicated_issue, :relation_type => "relates")
+    @one_issue.save!
+
+    get :show
+    response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}' relates='#{@one_issue.id}'/)
+  end
 end

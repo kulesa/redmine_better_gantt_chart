@@ -28,18 +28,24 @@ module IssuesHelper
       "<strong>#{@cached_label_assigned_to}</strong>: #{issue.assigned_to}<br />" +
       "<strong>#{@cached_label_priority}</strong>: #{issue.priority.name}"
     
+    display_limit = 4 # That's max for a sane tooltip
+    
     unless issue.relations_to.empty?
-      content += "<br />" + issue.relations_to.map do |rel|
-        "<strong>#{@cached_label_follows}</strong>: #{link_to_issue(rel.issue_from)}"
+      content += "<br />" + issue.relations_to.first(display_limit).map do |rel|
+        "<strong>#{l(rel.label_for(issue))}</strong>: #{link_to_issue(rel.issue_from)}"
       end.join("<br />")
+      display_limit -= issue.relations_to.count 
     end
     
     unless issue.relations_from.empty?
-      content += "<br />" + issue.relations_from.map do |rel|
-        "<strong>#{@cached_label_precedes}</strong>: #{link_to_issue(rel.issue_to)}"
+      new_limit = display_limit < 0 ? 0 : display_limit
+      content += "<br />" + issue.relations_from.first(new_limit).map do |rel|
+        "<strong>#{l(rel.label_for(issue))}</strong>: #{link_to_issue(rel.issue_to)}"
       end.join("<br />")
+      display_limit -= issue.relations_from.count
     end
     
+    content += "<br /><i>There are #{0-display_limit} more relations</i>" if display_limit < 0
     content
   end
 end

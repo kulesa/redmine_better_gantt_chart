@@ -4,11 +4,18 @@ This plugin draws arrows on Redmine gantt chart.
 
 # Draws an arrow 
 # Original here: http://taitems.tumblr.com/post/549973287/drawing-arrows-in-raphaeljs
-Raphael.fn.ganttArrow = (x1, y1, x6, y6) -> 
-  line = (x1, y1, x2, y2) -> 
+Raphael.fn.ganttArrow = (x1, y1, x6, y6, relationType = "follows") ->
+  # Strokes for relation types
+  relationDash =
+    "follows": ""
+    "duplicated": "- "
+    "blocked": "-"
+    "relates": "."
+ 
+  line = (x1, y1, x2, y2) ->
     ["M", x1, y1, "L", x2, y2]
 
-  triangle = (cx, cy, r) -> 
+  triangle = (cx, cy, r) ->
     r *= 1.75
     "M".concat(cx, ",", cy, "m0-", r * .58, "l", r * .5, ",", r * .87, "-", r, ",0z")
 
@@ -30,24 +37,28 @@ Raphael.fn.ganttArrow = (x1, y1, x6, y6) ->
   else
     [x4, y4] = [x5, y3]
   
-  arrow.push @path(line(x1, y1, x2, y2)) 
-  arrow.push @path(line(x2, y2, x3, y3)) 
-  arrow.push @path(line(x3, y3, x4, y4)) 
-  arrow.push @path(line(x4, y4, x5, y5)) 
+  arrow.push @path(line(x1, y1, x2, y2))
+  arrow.push @path(line(x2, y2, x3, y3))
+  arrow.push @path(line(x3, y3, x4, y4))
+  arrow.push @path(line(x4, y4, x5, y5))
   arrow.push @path(line(x5, y6, x6, y6))
   arrowhead = arrow.push(@path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90))
   arrow.toFront()
-  return arrow.attr({fill: "#444", stroke: "#222"})
+  return arrow.attr({fill: "#444", stroke: "#222", "stroke-dasharray": relationDash[relationType]})
   
 ###
 Draws connection arrows over the gantt chart
-###  
+###
 window.redrawGanttArrows = () ->
   paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
-  window.paper = paper;
+  window.paper = paper
+
+  # Relation attributes
+  relationAttrs = ["follows", "blocked", "duplicated", "relates"]
   
+ 
   # Calculates arrow coordinates
-  calculateAnchors = (from, to) -> 
+  calculateAnchors = (from, to) ->
     [fromOffsetX, fromOffsetY] = Element.positionedOffset(from)
     [toOffsetX, toOffsetY]     = Element.positionedOffset(to)
     if to.hasClassName('parent')
@@ -57,9 +68,10 @@ window.redrawGanttArrows = () ->
     [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
 
   # Draw arrows for all tasks, which have dependencies
-  $$('div.task_todo').each (element) -> 
-    if (follows = Element.readAttribute(element, 'follows'))
-      for id in follows.split(',')
-        if (item = $(id))
-          [x1, y1, x2, y2] = calculateAnchors(item, element)
-          paper.ganttArrow(x1, y1, x2, y2)
+  $$('div.task_todo').each (element) ->
+    for relationAttribute in relationAttrs
+      if (related = Element.readAttribute(element, relationAttribute))
+        for id in related.split(',')
+          if (item = $(id))
+            [x1, y1, x2, y2] = calculateAnchors(item, element)
+            paper.ganttArrow(x1, y1, x2, y2, relationAttribute)
