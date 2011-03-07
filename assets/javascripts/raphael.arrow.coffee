@@ -51,6 +51,7 @@ Draws connection arrows over the gantt chart
 ###
 window.redrawGanttArrows = () ->
   paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
+  paper.clear()
   window.paper = paper
 
   # Relation attributes
@@ -59,19 +60,19 @@ window.redrawGanttArrows = () ->
  
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
-    [fromOffsetX, fromOffsetY] = Element.positionedOffset(from)
-    [toOffsetX, toOffsetY]     = Element.positionedOffset(to)
+    [fromOffsetX, fromOffsetY] = from.getOffsetParent().positionedOffset()
+    [toOffsetX, toOffsetY]     = to.getOffsetParent().positionedOffset()
     if to.hasClassName('parent')
       typeOffsetX = 10
     else
       typeOffsetX = 6
-    [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
+    [fromOffsetX + from.getWidth() - 1, fromOffsetY + 2 + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + 2 + to.getHeight()/2]
 
   # Draw arrows for all tasks, which have dependencies
   $$('div.task_todo').each (element) ->
     for relationAttribute in relationAttrs
       if (related = Element.readAttribute(element, relationAttribute))
         for id in related.split(',')
-          if (item = $(id))
+          if (item = $$("#task_todo_i#{id}.onpage")[0])
             [x1, y1, x2, y2] = calculateAnchors(item, element)
             paper.ganttArrow(x1, y1, x2, y2, relationAttribute)

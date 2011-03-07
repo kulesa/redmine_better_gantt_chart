@@ -53,18 +53,19 @@
   window.redrawGanttArrows = function() {
     var calculateAnchors, paper, relationAttrs;
     paper = Raphael("gantt_lines", "100%", "100%");
+    paper.clear();
     window.paper = paper;
     relationAttrs = ["follows", "blocked", "duplicated", "relates"];
     calculateAnchors = function(from, to) {
       var fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref2;
-      _ref = Element.positionedOffset(from), fromOffsetX = _ref[0], fromOffsetY = _ref[1];
-      _ref2 = Element.positionedOffset(to), toOffsetX = _ref2[0], toOffsetY = _ref2[1];
+      _ref = from.getOffsetParent().positionedOffset(), fromOffsetX = _ref[0], fromOffsetY = _ref[1];
+      _ref2 = to.getOffsetParent().positionedOffset(), toOffsetX = _ref2[0], toOffsetY = _ref2[1];
       if (to.hasClassName('parent')) {
         typeOffsetX = 10;
       } else {
         typeOffsetX = 6;
       }
-      return [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
+      return [fromOffsetX + from.getWidth() - 1, fromOffsetY + 2 + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + 2 + to.getHeight() / 2];
     };
     return $$('div.task_todo').each(function(element) {
       var id, item, related, relationAttribute, x1, x2, y1, y2, _i, _len, _results;
@@ -78,7 +79,7 @@
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               id = _ref[_i];
-              _results.push((item = $(id)) ? ((_ref2 = calculateAnchors(item, element), x1 = _ref2[0], y1 = _ref2[1], x2 = _ref2[2], y2 = _ref2[3], _ref2), paper.ganttArrow(x1, y1, x2, y2, relationAttribute)) : void 0);
+              _results.push((item = $$("#task_todo_i" + id + ".onpage")[0]) ? ((_ref2 = calculateAnchors(item, element), x1 = _ref2[0], y1 = _ref2[1], x2 = _ref2[2], y2 = _ref2[3], _ref2), paper.ganttArrow(x1, y1, x2, y2, relationAttribute)) : void 0);
             }
             return _results;
           }

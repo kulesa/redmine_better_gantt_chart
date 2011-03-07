@@ -59,26 +59,26 @@ describe GanttsController, '#show' do
   
   it 'should insert issue ids and follow tags' do
     get :show
-    response.should have_text(/div id='#{@preceding_issue.id}'/)
-    response.should have_text(/div id='#{@following_issue.id}' follows='#{@preceding_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@preceding_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@following_issue.id}' follows='#{@preceding_issue.id}'/)
   end
   
   it 'should insert blocked tags' do
     get :show
-    response.should have_text(/div id='#{@blocks_issue.id}'/)
-    response.should have_text(/div id='#{@blocked_issue.id}' blocked='#{@blocks_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@blocks_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@blocked_issue.id}' blocked='#{@blocks_issue.id}'/)
   end
   
   it 'should insert duplicated tags' do
     get :show
-    response.should have_text(/div id='#{@duplicates_issue.id}'/)
-    response.should have_text(/div id='#{@duplicated_issue.id}' duplicated='#{@duplicates_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@duplicates_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@duplicated_issue.id}' duplicated='#{@duplicates_issue.id}'/)
   end
   
   it 'should insert relates tags' do
     get :show
-    response.should have_text(/div id='#{@one_issue.id}'/)
-    response.should have_text(/div id='#{@other_issue.id}' relates='#{@one_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@one_issue.id}'/)
+    response.should have_text(/div id='task_todo_i#{@other_issue.id}' relates='#{@one_issue.id}'/)
   end
   
   it 'should insert an array of ids to a tag' do
