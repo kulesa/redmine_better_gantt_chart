@@ -4,7 +4,7 @@ This plugin draws arrows on Redmine gantt chart.
 
 # Draws an arrow 
 # Original here: http://taitems.tumblr.com/post/549973287/drawing-arrows-in-raphaeljs
-Raphael.fn.ganttArrow = (x1, y1, x6, y6, relationType = "follows") ->
+Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
   # Strokes for relation types
   relationDash =
     "follows": ""
@@ -18,6 +18,8 @@ Raphael.fn.ganttArrow = (x1, y1, x6, y6, relationType = "follows") ->
   triangle = (cx, cy, r) ->
     r *= 1.75
     "M".concat(cx, ",", cy, "m0-", r * .58, "l", r * .5, ",", r * .87, "-", r, ",0z")
+
+  [x1, y1, x6, y6] = coords
 
   arrow = @set()
   
@@ -44,23 +46,23 @@ Raphael.fn.ganttArrow = (x1, y1, x6, y6, relationType = "follows") ->
   arrow.push @path(line(x5, y6, x6, y6))
   arrowhead = arrow.push(@path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90))
   arrow.toFront()
-  return arrow.attr({fill: "#444", stroke: "#222", "stroke-dasharray": relationDash[relationType]})
+  arrow.attr({fill: "#444", stroke: "#222", "stroke-dasharray": relationDash[relationType]})
   
 ###
 Draws connection arrows over the gantt chart
 ###
 window.redrawGanttArrows = () ->
   paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
+  paper.clear
   window.paper = paper
 
   # Relation attributes
   relationAttrs = ["follows", "blocked", "duplicated", "relates"]
   
- 
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
-    [fromOffsetX, fromOffsetY] = Element.positionedOffset(from)
-    [toOffsetX, toOffsetY]     = Element.positionedOffset(to)
+    [fromOffsetX, fromOffsetY] = from.positionedOffset()
+    [toOffsetX, toOffsetY]     = to.positionedOffset()
     if to.hasClassName('parent')
       typeOffsetX = 10
     else
@@ -70,8 +72,7 @@ window.redrawGanttArrows = () ->
   # Draw arrows for all tasks, which have dependencies
   $$('div.task_todo').each (element) ->
     for relationAttribute in relationAttrs
-      if (related = Element.readAttribute(element, relationAttribute))
+      if (related = element.readAttribute(relationAttribute))
         for id in related.split(',')
           if (item = $(id))
-            [x1, y1, x2, y2] = calculateAnchors(item, element)
-            paper.ganttArrow(x1, y1, x2, y2, relationAttribute)
+            paper.ganttArrow calculateAnchors(item, element), relationAttribute
