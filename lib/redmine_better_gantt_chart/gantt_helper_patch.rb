@@ -74,7 +74,7 @@ module RedmineBetterGanttChart
         if options[:issue] && coords[:bar_start] && coords[:bar_end]
           output << "<div id='tt_#{options[:kind]}#{options[:id]}' class='tooltip' style='position: absolute;top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] }px;height:12px;'>"
           output << '<span class="tip">'
-          output << view.render_issue_tooltip(options[:issue])
+          output << view.render_extended_issue_tooltip(options[:issue])
           output << "</span></div>"
 
           output << view.draggable_element("ev_#{options[:kind]}#{options[:id]}", :revert =>false, :scroll=>"'gantt-container'", :constraint => "'horizontal'", :snap=>params[:zoom],:onEnd=>'function( draggable, event )  {issue_moved(draggable.element);}')
