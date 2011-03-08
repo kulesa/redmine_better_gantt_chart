@@ -33,7 +33,7 @@ Raphael.fn.ganttArrow = (x1, y1, x6, y6, relationType = "follows") ->
     [x3, y3] = [x2, y6 + deltaY]
 
   if x1 + deltaX + 7 < x6
-    [x4, y4] = [x3, y3]
+    [x4, y4] = [x3, y5]
   else
     [x4, y4] = [x5, y3]
   
@@ -56,7 +56,6 @@ window.redrawGanttArrows = () ->
 
   # Relation attributes
   relationAttrs = ["follows", "blocked", "duplicated", "relates"]
-  
  
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->

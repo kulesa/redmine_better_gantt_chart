@@ -30,7 +30,7 @@
       _ref4 = [x2, y6 + deltaY], x3 = _ref4[0], y3 = _ref4[1];
     }
     if (x1 + deltaX + 7 < x6) {
-      _ref5 = [x3, y3], x4 = _ref5[0], y4 = _ref5[1];
+      _ref5 = [x3, y5], x4 = _ref5[0], y4 = _ref5[1];
     } else {
       _ref6 = [x5, y3], x4 = _ref6[0], y4 = _ref6[1];
     }
