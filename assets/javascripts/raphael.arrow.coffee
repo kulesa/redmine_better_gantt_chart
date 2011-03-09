@@ -35,7 +35,7 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
     [x3, y3] = [x2, y6 + deltaY]
 
   if x1 + deltaX + 7 < x6
-    [x4, y4] = [x3, y3]
+    [x4, y4] = [x3, y5]
   else
     [x4, y4] = [x5, y3]
   
