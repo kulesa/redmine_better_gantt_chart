@@ -67,7 +67,7 @@ module RedmineBetterGanttChart
       end
 
       # Fixes issues sorting as per http://www.redmine.org/issues/7335
-      def gantt_issue_compare_with_sorting(x, y, issues)
+      def gantt_issue_compare_with_sorting(x, y, issues = nil)
         [(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
       end
     end
