@@ -5,6 +5,7 @@ module RedmineBetterGanttChart
 
       base.class_eval do
         alias_method_chain :html_task, :arrows
+        alias_method_chain :gantt_issue_compare, :sorting
       end
     end
   
@@ -63,6 +64,11 @@ module RedmineBetterGanttChart
         end
         @lines << output
         output
+      end
+
+      # Fixes issues sorting as per http://www.redmine.org/issues/7335
+      def gantt_issue_compare_with_sorting(x, y, issues)
+        [(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
       end
     end
   end

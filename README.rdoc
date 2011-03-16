@@ -7,6 +7,7 @@ The plugin imroves functionality of Redmine Gantt Chart.
 - Issues on Gantt chart connected with arrows. Handy!
 - Relations info added to issue tooltip.
 - Fixed rescheduling of related tasks if due date of dependent task changed to an earlier date.
+- Fixed sorting of issues on the chart  as per http://www.redmine.org/issues/7335
 
 == Installation and Setup
 
