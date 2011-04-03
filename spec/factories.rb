@@ -1,8 +1,15 @@
+Factory.define :user_preference do |p|
+  p.time_zone ''
+  p.hide_mail false
+  p.others {{:gantt_months=>6, :comments_sorting=>"asc", :gantt_zoom=>3, :no_self_notified=>true}}
+end
+
 Factory.define :user do |u|
   u.sequence(:firstname) {|n| "John#{n}"}
   u.lastname 'Kilmer'
   u.sequence(:login) {|n| "john_#{n}"}
   u.sequence(:mail) {|n| "john#{n}@local.com"} 
+  u.association :preference, :factory => :user_preference
 end
 
 Factory.define :admin, :parent => :user do |u|

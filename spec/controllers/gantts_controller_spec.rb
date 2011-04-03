@@ -40,10 +40,7 @@ describe GanttsController, '#show' do
     @current_user = mock_model(User, :admin? => true, :logged? => true, :language => :en, :active? => true, :memberships => [], :anonymous? => false, :name => "A Test   >User", :projects => Project)
     User.stub!(:current).and_return(@current_user)
     @current_user.stub!(:allowed_to?).and_return(true)
-    @current_user.stub!(:pref).and_return({:gantt_zoom => 2, :gantt_months => 6})
-    fake_pref = mock_model(Object)
-    fake_pref.stub!(:save).and_return(true)
-    @current_user.stub!(:preferences).and_return(fake_pref)
+    @current_user.stub!(:pref).and_return(Factory(:user_preference, :user_id => @current_user.id))
   end
 
   it 'should be successful' do
@@ -98,4 +95,5 @@ describe GanttsController, '#show' do
     get :show
     response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}' relates='#{@one_issue.id}'/)
   end
+
 end
