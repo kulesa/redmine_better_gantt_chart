@@ -46,6 +46,12 @@ describe 'Issue Dependency Patch' do
         @current_issue.reload
       }.should change(@current_issue, :start_date).to(@current_issue.start_date + 2.days)
     end
+
+    it 'should not allow to create circular dependencies' do
+      lambda {
+        create_related_issues("precedes", @current_issue, @start_issue)
+      }.should raise_error(ActiveRecord::RecordInvalid)
+    end
    end
 end
 
