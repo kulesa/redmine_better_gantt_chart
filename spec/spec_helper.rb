@@ -36,3 +36,11 @@ if defined?(Rcov)
   all_app_files.each{|rb| require rb}
 end
 
+def create_related_issues(relation_type, delay = 0)
+  from_issue, to_issue = Factory(:issue), Factory(:issue)
+  from_issue.relations << IssueRelation.create!(:issue_from => from_issue, :issue_to => to_issue, :relation_type => relation_type, :delay => delay)
+  from_issue.save!
+
+  [from_issue, to_issue].map(&:reload)
+end
+

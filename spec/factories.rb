@@ -1,3 +1,21 @@
+# This should prevent creation of new instance when I want to use the only existing
+saved_single_instances = {}
+#Find or create the model instance
+single_instances = lambda do |factory_key|
+  begin
+    saved_single_instances[factory_key].reload
+  rescue NoMethodError, ActiveRecord::RecordNotFound  
+    #was never created (is nil) or was cleared from db
+    saved_single_instances[factory_key] = Factory.create(factory_key)  #recreate
+  end
+
+  return saved_single_instances[factory_key]
+end
+
+def test_time
+  @test_time ||= Time.new()
+end
+
 Factory.define :user_preference do |p|
   p.time_zone ''
   p.hide_mail false
@@ -28,8 +46,14 @@ Factory.define :tracker do |t|
    t.sequence(:position) {|n| n}
 end
 
-Factory.define :project_with_tracker, :parent => :project do |project|
-  project.after_create { |p| p.trackers << Factory(:tracker); p.save! }
+Factory.define :bug, :parent => :tracker do |t|
+  t.name 'Bug'
+end
+
+Factory.define :main_project, :parent => :project do |project|
+  project.name 'The Main Project'
+  project.identifier 'supaproject'
+  project.after_create { |p| p.trackers << single_instances[:bug]; p.save! }
 end
 
 Factory.define :issue_priority do |i|
@@ -46,9 +70,11 @@ end
 Factory.define :issue do |i|
   i.sequence(:subject) {|n| "Issue_no_#{n}"}
   i.description {|u| u.subject}
-  i.association :project
-  i.association :tracker
+  i.project { single_instances[:main_project] }
+  i.tracker { single_instances[:bug] }
   i.association :priority, :factory => :issue_priority
   i.association :status, :factory => :issue_status
   i.association :author, :factory => :user
+  i.start_date { test_time }
+  i.due_date { test_time + 3.days}
 end

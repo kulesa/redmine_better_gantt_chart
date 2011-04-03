@@ -5,35 +5,17 @@ describe GanttsController, '#show' do
   integrate_views
         
   before(:all) do 
-    @tracker = Factory(:tracker)
-    @project = Factory(:project)
-    
-    @start_date = Time.new()
-    start_date, due_date = @start_date, @start_date + 3.days
-    
     # Precedes - Follows
-    @preceding_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @following_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date)
-    @preceding_issue.relations << IssueRelation.create!(:issue_from => @preceding_issue, :issue_to => @following_issue, :relation_type => "precedes", :delay => 0)
-    @preceding_issue.save!
+    @preceding_issue, @following_issue = create_related_issues("precedes")
     
     # Blocks - Blocked
-    @blocks_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @blocked_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @blocks_issue.relations << IssueRelation.create!(:issue_from => @blocks_issue, :issue_to => @blocked_issue, :relation_type => "blocks", :delay => 0)
-    @blocks_issue.save!
-
+    @blocks_issue, @blocked_issue = create_related_issues("blocks")
+    
     # Duplicates - Duplicated
-    @duplicates_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @duplicated_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @duplicates_issue.relations << IssueRelation.create!(:issue_from => @duplicates_issue, :issue_to => @duplicated_issue, :relation_type => "duplicates", :delay => 0)
-    @duplicates_issue.save!
+    @duplicates_issue, @duplicated_issue = create_related_issues("duplicates")
 
     # Relates
-    @one_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @other_issue = Factory(:issue, :project => @project, :tracker => @tracker, :start_date => start_date, :due_date => due_date) 
-    @one_issue.relations << IssueRelation.create!(:issue_from => @one_issue, :issue_to => @other_issue, :relation_type => "relates", :delay => 0)
-    @one_issue.save!
+    @one_issue, @other_issue = create_related_issues("relates")
   end
   
   before(:each) do
@@ -95,5 +77,4 @@ describe GanttsController, '#show' do
     get :show
     response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}' relates='#{@one_issue.id}'/)
   end
-
 end
