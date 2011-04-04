@@ -8,6 +8,7 @@ The plugin imroves functionality of Redmine Gantt Chart.
 - Relations info added to issue tooltip.
 - Fixed rescheduling of related tasks if due date of dependent task changed to an earlier date.
 - Fixed sorting of issues on the chart  as per http://www.redmine.org/issues/7335
+- Added validation: start date of child issue cannot be less than start date of the parent, if parent depends on other tasks
 
 == Installation and Setup
 
