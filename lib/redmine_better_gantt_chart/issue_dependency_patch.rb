@@ -5,6 +5,7 @@ module RedmineBetterGanttChart
 
       base.class_eval do
         alias_method_chain :reschedule_after, :earlier_date
+        alias_method_chain :soonest_start, :dependent_parent_validation
       end
     end
   
@@ -27,6 +28,26 @@ module RedmineBetterGanttChart
           end
         end
       end    
+
+      # Modifies validation of soonest start date for a new task:
+      # if parent task has dependency, start date cannot be earlier than start date of the parent.
+      def soonest_start_with_dependent_parent_validation
+        @soonest_start ||= (
+          relations_to.collect{|relation| relation.successor_soonest_start} +
+          ancestors.collect(&:soonest_start) + 
+          [parent_start_constraint]
+        ).compact.max
+      end
+
+      # Returns [soonest_start_date] if parent task has dependency contstraints
+      # or [nil] otherwise
+      def parent_start_constraint
+        if parent_issue_id && @parent_issue
+          @parent_issue.soonest_start
+        else
+          nil
+        end
+      end
     end
   end
 end

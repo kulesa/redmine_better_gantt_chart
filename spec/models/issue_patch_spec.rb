@@ -26,7 +26,8 @@ describe 'Issue Dependency Patch' do
     before do
       @start_issue = Factory(:issue) 
       @current_issue = @start_issue
-      30.times do 
+      # Change X.times to a really big number to stress test rescheduling of a really long chain of dependent issues :)
+      3.times do 
         previous_issue, @current_issue = create_related_issues("precedes", @current_issue)
       end
     end
@@ -53,5 +54,14 @@ describe 'Issue Dependency Patch' do
       }.should raise_error(ActiveRecord::RecordInvalid)
     end
    end
+
+    it 'should not allow set start date earlier than parent.soonest_start' do
+      child_issue = Factory.build(:issue)
+      child_issue.parent_issue_id = @second_issue.id
+      lambda {
+        child_issue.start_date = @second_issue.start_date - 1
+        child_issue.save!
+      }.should raise_error(ActiveRecord::RecordInvalid)
+    end
 end
 
