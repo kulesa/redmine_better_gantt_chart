@@ -73,18 +73,20 @@ t_height = g_height + headers_height
 %>
 <input type="hidden" name="_date_from" id="i_date_from" value="<%=h(@gantt.date_from)%>" />
 <input type="hidden" name="_date_to" id="i_date_to" value="<%=h(@gantt.date_to)%>" />
-<input type="hidden" name="zm" id="i_zm" value="<%=h(zoom)%>" />
+<input type="hidden" name="zm" id="i_zm" value="<%=zoom%>" />
+<input type="hidden" name="pzm" id="i_pzm" value="<%=@gantt.zoom%>" />
 <script type='text/javascript'>
   function issue_moved(elem) {
     var id_str = elem.id.substring(3, elem.id.length);
     var v_date_from = document.getElementById('i_date_from').getAttribute("value");
     var v_date_to = document.getElementById('i_date_to').getAttribute("value");
     var v_zm = document.getElementById('i_zm').getAttribute("value");
+    var v_pzm = document.getElementById('i_pzm').getAttribute("value");
     var url_str = '<%=  url_for(:controller=>:gantts, :action => :edit_gantt) %>';
     url_str = url_str + "/" + id_str;
     var day = parseInt(elem.style.left)/parseInt(v_zm);
     new Ajax.Request(url_str, {asynchronous:true, evalScripts:true,
-      parameters: 'day='+day+'&date_from='+v_date_from+'&date_to='+v_date_to+'&zoom='+v_zm+"&project_id=<%= @project.to_param %>",
+      parameters: 'day='+day+'&date_from='+v_date_from+'&date_to='+v_date_to+'&zoom='+v_pzm+"&project_id=<%= @project.to_param %>",
       onSuccess:function(obj) {
         change_dates(obj.responseText);
       },
