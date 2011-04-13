@@ -6,6 +6,8 @@ module RedmineBetterGanttChart
       base.class_eval do
         alias_method_chain :html_task, :arrows
         alias_method_chain :gantt_issue_compare, :sorting
+        alias_method_chain :render_project, :cross_project_issues
+        alias_method_chain :number_of_rows_on_project, :cross_project_issues
       end
     end
   
@@ -69,6 +71,54 @@ module RedmineBetterGanttChart
       # Fixes issues sorting as per http://www.redmine.org/issues/7335
       def gantt_issue_compare_with_sorting(x, y, issues = nil)
         [(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
+      end
+
+      # Adds cross-project related issues to rendering
+      def render_project_with_cross_project_issues(project, options={})
+        options[:top] = 0 unless options.key? :top
+        options[:indent_increment] = 20 unless options.key? :indent_increment
+        options[:top_increment] = 20 unless options.key? :top_increment
+
+        subject_for_project(project, options) unless options[:only] == :lines
+        line_for_project(project, options) unless options[:only] == :subjects
+
+        options[:top] += options[:top_increment]
+        options[:indent] += options[:indent_increment]
+        @number_of_rows += 1
+        return if abort?
+
+        # Second, Issues without a version
+        issues = project.issues.for_gantt.without_version.with_query(@query).all(:limit => current_limit)
+        issues += project.cross_project_related_issues
+        sort_issues!(issues)
+        if issues
+          render_issues(issues, options)
+          return if abort?
+        end
+
+        # Third, Versions
+        project.versions.sort.each do |version|
+          render_version(version, options)
+          return if abort?
+        end
+
+        # Fourth, subprojects
+        project.children.visible.has_module('issue_tracking').each do |project|
+          render_project(project, options)
+          return if abort?
+        end unless project.leaf?
+
+        # Remove indent to hit the next sibling
+        options[:indent] -= options[:indent_increment]
+      end
+
+      # Adds cross-project related issues to counting
+      def number_of_rows_on_project_with_cross_project_issues(project)
+        count = self.number_of_rows_on_project_without_cross_project_issues(project)
+
+        count += project.cross_project_related_issues
+
+        count
       end
     end
   end

@@ -4,12 +4,17 @@ require 'dispatcher'
 
 Dispatcher.to_prepare :redmine_issue_dependency do
   require_dependency 'issue'
+  require_dependency 'project'
   # Guards against including the module multiple time (like in tests)
   # and registering multiple callbacks
   unless Issue.included_modules.include? RedmineBetterGanttChart::IssueDependencyPatch
     Issue.send(:include, RedmineBetterGanttChart::IssueDependencyPatch)
   end
   
+  unless Project.included_modules.include? RedmineBetterGanttChart::ProjectPatch
+    Project.send(:include, RedmineBetterGanttChart::ProjectPatch)
+  end
+
   unless Redmine::Helpers::Gantt.included_modules.include? RedmineBetterGanttChart::GanttHelperPatch
     Redmine::Helpers::Gantt.send(:include, RedmineBetterGanttChart::GanttHelperPatch)
   end
