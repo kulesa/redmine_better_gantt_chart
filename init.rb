@@ -10,6 +10,10 @@ Dispatcher.to_prepare :redmine_issue_dependency do
   unless Issue.included_modules.include? RedmineBetterGanttChart::IssueDependencyPatch
     Issue.send(:include, RedmineBetterGanttChart::IssueDependencyPatch)
   end
+
+  unless Issue.included_modules.include? RedmineBetterGanttChart::IssuePatch
+    Issue.send(:include, RedmineBetterGanttChart::IssuePatch)
+  end
   
   unless Project.included_modules.include? RedmineBetterGanttChart::ProjectPatch
     Project.send(:include, RedmineBetterGanttChart::ProjectPatch)

@@ -11,6 +11,7 @@ module RedmineBetterGanttChart
           related_issues = []
           issue.relations.each do |relation|
             related_issue = relation.other_issue(issue)
+            related_issue.is_external = true
             related_issues << related_issue unless related_issue.project == issue.project
           end
           return related_issues

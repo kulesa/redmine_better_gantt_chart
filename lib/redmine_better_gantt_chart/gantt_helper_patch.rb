@@ -8,6 +8,8 @@ module RedmineBetterGanttChart
         alias_method_chain :gantt_issue_compare, :sorting
         alias_method_chain :render_project, :cross_project_issues
         alias_method_chain :number_of_rows_on_project, :cross_project_issues
+        alias_method_chain :html_subject, :cross_project_issues
+        alias_method_chain :subject_for_issue, :cross_project_issues
       end
     end
   
@@ -119,6 +121,55 @@ module RedmineBetterGanttChart
         count += project.cross_project_related_issues
 
         count
+      end
+
+      # Prefixes cross-project related issues with their project name
+      def subject_for_issue_with_cross_project_issues(issue, options)
+        while @issue_ancestors.any? && !issue.is_descendant_of?(@issue_ancestors.last)
+          @issue_ancestors.pop
+          options[:indent] -= options[:indent_increment]
+        end
+
+        output = case options[:format]
+        when :html
+          css_classes = ''
+          css_classes << ' issue-overdue' if issue.overdue?
+          css_classes << ' issue-behind-schedule' if issue.behind_schedule?
+          css_classes << ' icon icon-issue' unless Setting.gravatar_enabled? && issue.assigned_to
+
+          subject = "<span class='#{css_classes}'>"
+          if issue.assigned_to.present?
+            assigned_string = l(:field_assigned_to) + ": " + issue.assigned_to.name
+            subject << view.avatar(issue.assigned_to, :class => 'gravatar icon-gravatar', :size => 10, :title => assigned_string).to_s
+          end
+          subject << "(" + view.link_to_project(issue.project) + ") " if issue.is_external
+          subject << view.link_to_issue(issue)
+          subject << '</span>'
+          html_subject(options, subject, :css => "issue-subject", :title => issue.subject, :external => issue.is_external) + "\n"
+        when :image
+          image_subject(options, issue.subject)
+        when :pdf
+          pdf_new_page?(options)
+          pdf_subject(options, issue.subject)
+        end
+
+        unless issue.leaf?
+          @issue_ancestors << issue
+          options[:indent] += options[:indent_increment]
+        end
+
+        output
+      end
+
+      # Renders subjects of cross-project related issues in italic
+      def html_subject_with_cross_project_issues(params, subject, options={})
+        style = "position: absolute;top:#{params[:top]}px;left:#{params[:indent]}px;"
+        style << "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
+        style << "font-style:italic;" if options[:external]
+
+        output = view.content_tag 'div', subject, :class => options[:css], :style => style, :title => options[:title]
+        @subjects << output
+        output
       end
     end
   end
