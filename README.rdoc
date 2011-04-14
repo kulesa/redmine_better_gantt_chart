@@ -40,7 +40,7 @@ or whatever with any other questions or feature requests. To submit changes fork
 
 == Contributors
 
-Thanks to Jeremy Subtil ([BigMadWolf](https://github.com/BigMadWolf)) for contributing a patch for displaying connections between cross-project related issues.
+Thanks to Jeremy Subtil ({BigMadWolf}[https://github.com/BigMadWolf]) for contributing a patch for displaying connections between cross-project related issues.
 
 == License
 
