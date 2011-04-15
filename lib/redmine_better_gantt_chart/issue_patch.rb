@@ -6,16 +6,13 @@ module RedmineBetterGanttChart
 
     module InstanceMethods
       # Defines whether this issue is marked as external from the current project
-      def is_external=(flag)
+      def external=(flag)
         @external = flag
       end
 
        # Returns whether this issue is marked as external from the current project
-      def is_external
-        if @external == nil
-          return false
-        end
-        @external
+      def external?
+        !!@external
       end
     end
   end

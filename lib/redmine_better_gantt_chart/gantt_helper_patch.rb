@@ -142,10 +142,10 @@ module RedmineBetterGanttChart
             assigned_string = l(:field_assigned_to) + ": " + issue.assigned_to.name
             subject << view.avatar(issue.assigned_to, :class => 'gravatar icon-gravatar', :size => 10, :title => assigned_string).to_s
           end
-          subject << "(" + view.link_to_project(issue.project) + ") " if issue.is_external
+          subject << "(" + view.link_to_project(issue.project) + ") " if issue.external?
           subject << view.link_to_issue(issue)
           subject << '</span>'
-          html_subject(options, subject, :css => "issue-subject", :title => issue.subject, :external => issue.is_external) + "\n"
+          html_subject(options, subject, :css => "issue-subject", :title => issue.subject, :external => issue.external?) + "\n"
         when :image
           image_subject(options, issue.subject)
         when :pdf
