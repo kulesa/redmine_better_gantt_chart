@@ -20,10 +20,10 @@ Spec::Runner.configure do |config|
 
   config.before(:suite) do 
     DatabaseCleaner.strategy = :deletion
+    DatabaseCleaner.clean
   end
 
   config.after(:suite) do 
-    DatabaseCleaner.clean
   end
 end
 
@@ -42,3 +42,7 @@ def create_related_issues(relation_type, from_issue = Factory(:issue), to_issue 
   [from_issue, to_issue].map(&:reload)
 end
 
+def relate_issues(from_issue, to_issue, relation_type = 'precedes')
+ from_issue.relations <<  IssueRelation.create!(:issue_from => from_issue, :issue_to => to_issue, :relation_type => relation_type)
+ from_issue.save!
+end

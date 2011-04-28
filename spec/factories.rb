@@ -76,5 +76,5 @@ Factory.define :issue do |i|
   i.association :status, :factory => :issue_status
   i.association :author, :factory => :user
   i.start_date { test_time }
-  i.due_date { test_time + 3.days}
+  i.due_date { |u| u.start_date + 3.days}
 end
