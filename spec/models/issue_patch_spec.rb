@@ -33,20 +33,16 @@ describe 'Improved issue dependencies management' do
 
   describe 'handles long dependency chains' do
     before do
-      @start_issue = Factory(:issue) 
+      @start_issue = Factory(:issue)
       @current_issue = @start_issue
       # Change X.times to a really big number to stress test rescheduling of a really long chain of dependent issues :)
-      2.times do
+      20.times do
         previous_issue, @current_issue = create_related_issues("precedes", @current_issue)
       end
     end
 
     it 'and reschedules tens of related issues when due date of the first issue is moved back' do
-      puts "******* Long 1 **********"
-      puts "First issue #{@start_issue.id}, start: #{@start_issue.start_date}, due: #{@start_issue.due_date}"
       si = Issue.find(@start_issue.id + 1)
-      puts "Second issue #{si.id}, start: #{si.start_date}, due: #{si.due_date}"
-      puts "Last issue #{@current_issue.id}, start: #{@current_issue.start_date}, due: #{@current_issue.due_date}"
      lambda {
         @start_issue.due_date = @start_issue.due_date - 2.days
         @start_issue.save!
@@ -55,9 +51,6 @@ describe 'Improved issue dependencies management' do
     end
 
     it 'and reschedules tens of related issues when due date of the first task is moved forth' do
-      puts "******* Long 2 **********"
-      puts "First issue #{@start_issue.id}, start: #{@start_issue.start_date}, due: #{@start_issue.due_date}"
-      puts "Last issue #{@current_issue.id}, start: #{@current_issue.start_date}, due: #{@current_issue.due_date}"
      lambda {
         @start_issue.due_date = @start_issue.due_date + 2.days
         @start_issue.save!
@@ -78,17 +71,31 @@ describe 'Improved issue dependencies management' do
       # @initial -> @related -> @parent [ @child1 -> @child2]
       @initial, @related = create_related_issues("precedes")
       @related, @parent = create_related_issues("precedes", @related)
-
       @child1 = Factory.build(:issue, :start_date => @parent.start_date)
       @child2 = Factory.build(:issue, :start_date => @parent.start_date)
       @child1.parent_issue_id = @parent.id
-      @child2.parent_issue_id = @parent.id
       @child1.save!
+      @child2.parent_issue_id = @parent.id
       @child2.save!
 
       create_related_issues("precedes", @child1, @child2)
     end
 
+    it "should change start date of the last dependend child issue when due date of the first issue moved FORWARD" do
+      lambda {
+        @initial.due_date = @initial.due_date + 2.days
+        @initial.save!
+        @child2.reload
+      }.should change(@child2, :start_date).to(@child2.start_date + 2.days)
+    end
+
+    it "should change start date of the last dependend child issue when due date of the first issue moved BACK" do
+      lambda {
+        @initial.due_date = @initial.due_date - 2.days
+        @initial.save!
+        @child2.reload
+      }.should change(@child2, :start_date).to(@child2.start_date - 2.days)
+    end
   end
 end
 
