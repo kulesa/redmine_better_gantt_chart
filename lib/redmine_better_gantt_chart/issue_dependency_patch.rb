@@ -52,17 +52,15 @@ module RedmineBetterGanttChart
         @changes = {} # a hash of changes to be applied later, will contain values like this: { issue_id => {:start_date => ..., :end_date => ...}}
         @parents = {} # a hash of children for any affected parent issue
         yield
-        # And now, TADA: highly experimental sorting of changes by due_date.
-        # It should let pass start_date validations if issues are updated in this order.
+        # Sorting of cached changes by due_date should let pass start_date validations if issues are updated in this order.
         ordered_changes = []
         @changes.each {|c| ordered_changes << [c[1][:due_date], c]}
         ordered_changes.sort!
-        # Let's disable all calbacks for now because this will change only dates
+        # Let's disable all calbacks for now
         Issue.with_all_callbacks_disabled do
           transaction do
             ordered_changes.each do |the_changes|
-              issue_id = the_changes[1][0]
-              changes = the_changes[1][1]
+              issue_id, changes = the_changes[1]
               issue = Issue.find(issue_id)
               changes.each_pair do |key, value|
                 changes.delete(key) if issue.send(key) == value.to_date
@@ -75,12 +73,11 @@ module RedmineBetterGanttChart
         end
       end
 
-      # Cache changes to be applied later
-      # if no attributes to change given, just caches current values
-      # use :parent => true to just change one date without changing the other.
+      # Caches changes to be applied later. If no attributes to change given, just caches current values.
+      # Use :parent => true to just change one date without changing the other. If :parent is not specified, 
+      # change of one of the issue dates will cause change of the other.
       #
-      # If no options is provided existing, issue cache is initialized, that is,
-      # an cache will not be updated.
+      # If no options is provided existing, issue cache is initialized.
       def cache_change(issue, options = {})
         @changes[issue.id] ||= {}
         if options.empty?
@@ -92,6 +89,7 @@ module RedmineBetterGanttChart
           # Changing both dates
           new_start_date = options[:start_date]
           new_due_date   = options[:due_date]
+
         elsif options[:start_date]
           # Start date changed => change the due date
           new_start_date = options[:start_date]
@@ -113,18 +111,23 @@ module RedmineBetterGanttChart
         @changes[issue.id][:due_date]   = new_due_date.to_date if new_due_date
       end
 
+      # Returns cached value or caches it if it hasn't been cached yet
       def cached_value(issue, attr)
-        cache_change(issue) unless @changes[issue.id]
+        if issue.is_a?(Integer)
+          issue_id = issue
+          issue = Issue.find(issue_id) unless @changes[issue_id]
+        else
+          issue_id = issue.id
+        end
+        cache_change(issue) unless @changes[issue_id]
         case attr
         when :start_date
-          @changes[issue.id][:start_date]
+          @changes[issue_id][:start_date]
         when :due_date
-          @changes[issue.id][:due_date] || @changes[issue.id][:start_date]
+          @changes[issue_id][:due_date] || @changes[issue_id][:start_date]
         end
       end
 
-
-      # So what fucking now...
       # Each time we update cache of a child issue, need to update cache of the parent issue
       # by setting start_date to min(parent.all_children) and due_date to max(parent.all_children).
       # Apparently, to do so, first we need to add to cache all child issues of the parent, even if
@@ -150,29 +153,18 @@ module RedmineBetterGanttChart
       end
 
       def min_parent_start(current_parent_id)
-        min = nil
-        @parents[current_parent_id].uniq.each do |child_id|
-          current_child_start = cached_value(Issue.find(child_id), :start_date) #@changes[child_id][:start_date]
-          min ||= current_child_start
-          min = current_child_start if current_child_start < min
+        @parents[current_parent_id].uniq.inject(Date.new) do |min, child_id|
+          min = min < (current_child_start = cached_value(child_id, :start_date)) ? min : current_child_start
         end
-        min
       end
 
       def max_parent_due(current_parent_id)
-        max = nil
-        @parents[current_parent_id].each do |child_id|
-          current_child_due = @changes[child_id][:due_date]
-          max ||= current_child_due
-          max = current_child_due if current_child_due > max
+        @parents[current_parent_id].uniq.inject(Date.new) do |max, child_id|
+          max = max > (current_child_due = cached_value(child_id, :due_date)) ? max : current_child_due
         end
-        max
       end
 
-      # Extends behavior of reschedule_after method to also handle
-      # cases where start_date > date, that is, when due date of the previous task
-      # is changed for an earlier date. 
-
+      # Changes behaviour of reschedule_after method
       def reschedule_after_with_earlier_date(date)      
         return if date.nil?
         if start_date.nil? || start_date != date
