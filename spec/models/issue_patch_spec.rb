@@ -3,68 +3,68 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe 'Improved issue dependencies management' do
 
   before(:each) do 
-    @first_issue, @second_issue = create_related_issues("precedes")
-  end
-
-  it 'changes date of the dependent task when due date of the first task is moved forward' do
-    lambda {
-      @first_issue.due_date = @first_issue.due_date + 2.days
-      @first_issue.save!
-      @second_issue.reload
-    }.should change(@second_issue, :start_date).to(@first_issue.due_date + 3.days)
-  end
-
-  it 'changes date of the dependent task when due date of the first task is moved back' do
-    lambda {
-      @first_issue.due_date = @first_issue.due_date - 2.days
-      @first_issue.save!
-      @second_issue.reload
-    }.should change(@second_issue, :start_date).to(@first_issue.due_date - 1.day)
-  end
-
-  it 'doesn\'t allow set start date earlier than parent.soonest_start' do
-    child_issue = Factory.build(:issue)
-    child_issue.parent_issue_id = @second_issue.id
-    lambda {
-      child_issue.start_date = @second_issue.start_date - 1
-      child_issue.save!
-    }.should raise_error(ActiveRecord::RecordInvalid)
-  end
-
-  describe 'handles long dependency chains' do
-    before do
-      @start_issue = Factory(:issue)
-      @current_issue = @start_issue
-      # Change X.times to a really big number to stress test rescheduling of a really long chain of dependent issues :)
-      20.times do
-        previous_issue, @current_issue = create_related_issues("precedes", @current_issue)
-      end
-    end
-
-    it 'and reschedules tens of related issues when due date of the first issue is moved back' do
-      si = Issue.find(@start_issue.id + 1)
+     @first_issue, @second_issue = create_related_issues("precedes")
+   end
+  
+   it 'changes date of the dependent task when due date of the first task is moved forward' do
      lambda {
-        @start_issue.due_date = @start_issue.due_date - 2.days
-        @start_issue.save!
-        @current_issue.reload
-      }.should change(@current_issue, :start_date).to(@current_issue.start_date - 2.days)
-    end
-
-    it 'and reschedules tens of related issues when due date of the first task is moved forth' do
+       @first_issue.due_date = @first_issue.due_date + 2.days
+       @first_issue.save!
+       @second_issue.reload
+     }.should change(@second_issue, :start_date).to(@first_issue.due_date + 3.days)
+   end
+  
+   it 'changes date of the dependent task when due date of the first task is moved back' do
      lambda {
-        @start_issue.due_date = @start_issue.due_date + 2.days
-        @start_issue.save!
-        @current_issue.reload
-      }.should change(@current_issue, :start_date).to(@current_issue.start_date + 2.days)
-    end
-
-    it 'and doesn\'t allow create circular dependencies' do
+       @first_issue.due_date = @first_issue.due_date - 2.days
+       @first_issue.save!
+       @second_issue.reload
+     }.should change(@second_issue, :start_date).to(@first_issue.due_date - 1.day)
+   end
+  
+   it 'doesn\'t allow set start date earlier than parent.soonest_start' do
+     child_issue = Factory.build(:issue)
+     child_issue.parent_issue_id = @second_issue.id
+     lambda {
+       child_issue.start_date = @second_issue.start_date - 1
+       child_issue.save!
+     }.should raise_error(ActiveRecord::RecordInvalid)
+   end
+  
+   describe 'handles long dependency chains' do
+     before do
+       @start_issue = Factory(:issue)
+       @current_issue = @start_issue
+       # Change X.times to a really big number to stress test rescheduling of a really long chain of dependent issues :)
+       20.times do
+         previous_issue, @current_issue = create_related_issues("precedes", @current_issue)
+       end
+     end
+  
+     it 'and reschedules tens of related issues when due date of the first issue is moved back' do
+       si = Issue.find(@start_issue.id + 1)
       lambda {
-        create_related_issues("precedes", @current_issue, @start_issue)
-      }.should raise_error(ActiveRecord::RecordInvalid)
-    end
-  end
-
+         @start_issue.due_date = @start_issue.due_date - 2.days
+         @start_issue.save!
+         @current_issue.reload
+       }.should change(@current_issue, :start_date).to(@current_issue.start_date - 2.days)
+     end
+  
+     it 'and reschedules tens of related issues when due date of the first task is moved forth' do
+      lambda {
+         @start_issue.due_date = @start_issue.due_date + 2.days
+         @start_issue.save!
+         @current_issue.reload
+       }.should change(@current_issue, :start_date).to(@current_issue.start_date + 2.days)
+     end
+  
+     it 'and doesn\'t allow create circular dependencies' do
+       lambda {
+         create_related_issues("precedes", @current_issue, @start_issue)
+       }.should raise_error(ActiveRecord::RecordInvalid)
+     end
+   end
+  
   describe 'allows fast rescheduling of dependent issues' do
     before do
       # Testing on the following dependency chain:
@@ -80,21 +80,36 @@ describe 'Improved issue dependencies management' do
 
       create_related_issues("precedes", @child1, @child2)
     end
-
+       
     it "should change start date of the last dependend child issue when due date of the first issue moved FORWARD" do
-      lambda {
-        @initial.due_date = @initial.due_date + 2.days
-        @initial.save!
-        @child2.reload
-      }.should change(@child2, :start_date).to(@child2.start_date + 2.days)
+     lambda {
+       @initial.due_date = @initial.due_date + 2.days
+       @initial.save!
+       @child2.reload
+     }.should change(@child2, :start_date).to(@child2.start_date + 2.days)
     end
 
     it "should change start date of the last dependend child issue when due date of the first issue moved BACK" do
-      lambda {
-        @initial.due_date = @initial.due_date - 2.days
-        @initial.save!
-        @child2.reload
-      }.should change(@child2, :start_date).to(@child2.start_date - 2.days)
+     lambda {
+       @initial.due_date = @initial.due_date - 2.days
+       @initial.save!
+       @child2.reload
+     }.should change(@child2, :start_date).to(@child2.start_date - 2.days)
+    end
+    
+    it "should not fail when due_date of one of rescheduled issues is nil" do 
+        initial, child = create_related_issues("precedes")
+        parent = Factory(:issue, :due_date => nil)
+        other_child = Factory(:issue, :due_date => nil)
+        child.parent_issue_id = parent.id
+        child.save!
+        other_child.parent_issue_id = parent.id
+        other_child.save!
+        parent.reload
+        other_child.reload
+        puts "other child due: #{other_child.due_date}, parent due: #{parent.due_date}"
+        child.destroy
+        
     end
   end
 end

@@ -54,7 +54,7 @@ module RedmineBetterGanttChart
         yield
         # Sorting of cached changes by due_date should let pass start_date validations if issues are updated in this order.
         ordered_changes = []
-        @changes.each {|c| ordered_changes << [c[1][:due_date], c]}
+        @changes.each {|c| ordered_changes << [c[1][:due_date] || c[1][:start_date], c]}
         ordered_changes.sort!
         # Let's disable all calbacks for now
         Issue.with_all_callbacks_disabled do

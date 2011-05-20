@@ -13,13 +13,12 @@ require 'database_cleaner'
 require File.expand_path(File.dirname(__FILE__) + '/factories.rb')
 
 Spec::Runner.configure do |config|
-  DatabaseCleaner.strategy = :deletion
+  DatabaseCleaner.strategy = :truncation
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures  = false
   config.fixture_path = RAILS_ROOT + '/spec/fixtures/'
 
   config.before(:suite) do 
-    DatabaseCleaner.strategy = :deletion
     DatabaseCleaner.clean
   end
 
