@@ -22,9 +22,9 @@ Dispatcher.to_prepare :redmine_issue_dependency do
   unless Project.included_modules.include? RedmineBetterGanttChart::ProjectPatch
     Project.send(:include, RedmineBetterGanttChart::ProjectPatch)
   end
-
-  unless Redmine::Helpers::Gantt.included_modules.include? RedmineBetterGanttChart::GanttHelperPatch
-    Redmine::Helpers::Gantt.send(:include, RedmineBetterGanttChart::GanttHelperPatch)
+  
+  unless GanttsController.included_modules.include? RedmineBetterGanttChart::GanttsControllerPatch
+    GanttsController.send(:include, RedmineBetterGanttChart::GanttsControllerPatch)
   end
 end
 
