@@ -77,39 +77,31 @@ module RedmineBetterGanttChart
 
       # Adds cross-project related issues to rendering
       def render_project_with_cross_project_issues(project, options={})
-        options[:top] = 0 unless options.key? :top
-        options[:indent_increment] = 20 unless options.key? :indent_increment
-        options[:top_increment] = 20 unless options.key? :top_increment
-
         subject_for_project(project, options) unless options[:only] == :lines
         line_for_project(project, options) unless options[:only] == :subjects
-
+        
         options[:top] += options[:top_increment]
         options[:indent] += options[:indent_increment]
         @number_of_rows += 1
         return if abort?
 
-        # Second, Issues without a version
-        issues = project.issues.for_gantt.without_version.with_query(@query).all(:limit => current_limit)
-        issues += project.cross_project_related_issues
+        issues = project_issues(project).select {|i| i.fixed_version.nil?}
         sort_issues!(issues)
         if issues
           render_issues(issues, options)
           return if abort?
         end
-
-        # Third, Versions
-        project.versions.sort.each do |version|
-          render_version(version, options)
-          return if abort?
+        
+        versions = project_versions(project)
+        versions.each do |version|
+          render_version(project, version, options)
         end
 
-        # Fourth, subprojects
-        project.children.visible.has_module('issue_tracking').each do |project|
-          render_project(project, options)
-          return if abort?
-        end unless project.leaf?
-
+        #project.children.visible.has_module('issue_tracking').each do |project|
+          #render_project(project, options)
+          #return if abort?
+        #end unless project.leaf?
+       
         # Remove indent to hit the next sibling
         options[:indent] -= options[:indent_increment]
       end

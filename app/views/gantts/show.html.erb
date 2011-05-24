@@ -1,14 +1,13 @@
 <%= javascript_include_tag "raphael-min.js", :plugin => "redmine_better_gantt_chart" %>
 <%= javascript_include_tag "raphael.arrow.js", :plugin => "redmine_better_gantt_chart" %>
-
 <% @gantt.view = self %>
-<h2><%= l(:label_gantt) %></h2>
+<h2><%= @query.new_record? ? l(:label_gantt) : h(@query.name) %></h2>
 
-<% form_tag(gantt_path(:month => params[:month], :year => params[:year], :months => params[:months]), :method => :put, :id => 'query_form') do %>
-  <%= hidden_field_tag('project_id', @project.to_param) if @project%>
-<fieldset id="filters" class="collapsible">
+<% form_tag({:controller => 'gantts', :action => 'show', :project_id => @project, :month => params[:month], :year => params[:year], :months => params[:months]}, :method => :get, :id => 'query_form') do %>
+<%= hidden_field_tag 'set_filter', '1' %>
+<fieldset id="filters" class="collapsible <%= @query.new_record? ? "" : "collapsed" %>">
   <legend onclick="toggleFieldset(this);"><%= l(:label_filter_plural) %></legend>
-	<div>
+	<div style="<%= @query.new_record? ? "" : "display: none;" %>">
     <%= render :partial => 'queries/filters', :locals => {:query => @query} %>
   </div>
 </fieldset>
@@ -25,17 +24,8 @@
 <%= select_year(@gantt.year_from, :prefix => "year", :discard_type => true) %>
 <%= hidden_field_tag 'zoom', @gantt.zoom %>
 
-<%= link_to_remote l(:button_apply), 
-                   { :url => { :set_filter => (@query.new_record? ? 1 : nil) },
-                     :update => "content",
-                     :with => "Form.serialize('query_form')"
-                   }, :class => 'icon icon-checked' %>
-                   
-<%= link_to_remote l(:button_clear),
-                   { :url => { :project_id => @project, :set_filter => (@query.new_record? ? 1 : nil) }, 
-                   	 :method => :put,
-                     :update => "content",
-                   }, :class => 'icon icon-reload' if @query.new_record? %>
+<%= link_to_function l(:button_apply), '$("query_form").submit()', :class => 'icon icon-checked' %>
+<%= link_to l(:button_clear), { :project_id => @project, :set_filter => 1 }, :class => 'icon icon-reload' %>
 </p>
 <% end %>
 
@@ -91,8 +81,7 @@ t_height = g_height + headers_height
 </td>
 <td>
 
-<div style="position:relative;height:<%= t_height + 24 %>px; overflow-x:auto;; overflow-y:hidden;">
-  
+<div style="position:relative;height:<%= t_height + 24 %>px;overflow-x:auto; overflow-y:hidden;">
 <div style="width:<%= g_width-1 %>px;height:<%= headers_height %>px;background: #eee;" class="gantt_hdr">&nbsp;</div>
 <% 
 #
@@ -155,7 +144,7 @@ if show_days
 	(@gantt.date_to - @gantt.date_from + 1).to_i.times do 
 	width =  zoom - 1
 	%>
-	<div style="left:<%= left %>px;top:37px;width:<%= width %>px;height:<%= height %>px;font-size:0.7em;opacity:0.7;<%= "background:#f1f1f1;" if wday > 5 %>" class="gantt_hdr">
+	<div style="left:<%= left %>px;top:37px;width:<%= width %>px;height:<%= height %>px;font-size:0.7em;<%= "background:#f1f1f1;" if wday > 5 %>" class="gantt_hdr">
 	<%= day_name(wday).first %>
 	</div>
 	<% 
@@ -182,14 +171,14 @@ if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
 
 <table width="100%">
 <tr>
-<td align="left"><%= link_to_remote ('&#171; ' + l(:label_previous)), {:url => @gantt.params_previous, :method => :get, :update => 'content', :complete => 'window.scrollTo(0,0)'}, {:href => url_for(@gantt.params_previous)} %></td>
-<td align="right"><%= link_to_remote (l(:label_next) + ' &#187;'), {:url => @gantt.params_next, :method => :get, :update => 'content', :complete => 'window.scrollTo(0,0)'}, {:href => url_for(@gantt.params_next)} %></td>
+<td align="left"><%= link_to_content_update('&#171; ' + l(:label_previous), params.merge(@gantt.params_previous)) %></td>
+<td align="right"><%= link_to_content_update(l(:label_next) + ' &#187;', params.merge(@gantt.params_next)) %></td>
 </tr>
 </table>
 
 <% other_formats_links do |f| %>
-	<%= f.link_to 'PDF', :url => @gantt.params %>
-	<%= f.link_to('PNG', :url => @gantt.params) if @gantt.respond_to?('to_image') %>
+	<%= f.link_to 'PDF', :url => params.merge(@gantt.params) %>
+	<%= f.link_to('PNG', :url => params.merge(@gantt.params)) if @gantt.respond_to?('to_image') %>
 <% end %>
 <% end # query.valid? %>
 
