@@ -9,7 +9,11 @@ The plugin imroves functionality of Redmine Gantt Chart.
 - Fixed rescheduling of related tasks if due date of dependent task changed to an earlier date.
 - Fixed sorting of issues on the chart  as per http://www.redmine.org/issues/7335
 - Added validation: start date of child issue cannot be less than start date of the parent, if parent depends on other tasks
-- NEW! Fast rescheduling of related issues. Now you can have hundreds of related issues with many levels of hierarchy, and expect they'll be rescheduled just almost as fast as if you were in MS Project. And it will not cause 'stack level too deep' error (not kidding)!
+- Fast rescheduling of related issues. Now you can have hundreds of related issues with many levels of hierarchy, and expect they'll be rescheduled just almost as fast as if you were in MS Project. And it will not cause 'stack level too deep' error (not kidding)!
+
+== Compatibility
+
+Tested with Redmine versions: 1.1.0, 1.1.1, 1.1.2, 1.1.3.
 
 == Installation and Setup
 
@@ -46,5 +50,3 @@ Thanks to Jeremy Subtil ({BigMadWolf}[https://github.com/BigMadWolf]) for contri
 == License
 
 Better Gantt Chart is released under MIT license.
-
-
