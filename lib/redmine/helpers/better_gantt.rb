@@ -109,8 +109,8 @@ module Redmine
       # Returns the number of rows that will be used to list a project on
       # the Gantt chart.  This will recurse for each subproject.
       # Adds cross-project related issues to counting
-      def number_of_rows_on_project_with_cross_project_issues(project)
-        count = self.number_of_rows_on_project_without_cross_project_issues(project)
+      def number_of_rows_on_project(project)
+        count = self.number_of_rows_on_project(project)
         count += project.cross_project_related_issues
         count
       end
