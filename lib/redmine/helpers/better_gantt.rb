@@ -507,11 +507,22 @@ module Redmine
       end if Object.const_defined?(:Magick)
 
       def to_pdf
+        unless ::Redmine::Export::PDF::IFPDF.respond_to?(:alias_nb_pages)
+          # Compatibility with 1.1.2
+          # TODO: get rid of this dirty hack
+          ::Redmine::Export::PDF::IFPDF.class_eval "alias :alias_nb_pages :AliasNbPages; alias :RDMCell :Cell"
+        end
+        
         if l(:general_pdf_encoding).upcase != 'UTF-8'
           pdf = ::Redmine::Export::PDF::IFPDF.new(current_language)
         else
-          pdf = ::Redmine::Export::PDF::ITCPDF.new(current_language)
+          begin
+            pdf = ::Redmine::Export::PDF::ITCPDF.new(current_language)
+          rescue NameError
+            pdf = ::Redmine::Export::PDF::IFPDF.new(current_language)            
+          end
         end
+  
         pdf.SetTitle("#{l(:label_gantt)} #{project}")
         pdf.alias_nb_pages
         pdf.footer_date = format_date(Date.today)
