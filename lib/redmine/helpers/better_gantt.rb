@@ -688,9 +688,13 @@ module Redmine
         issues.sort! { |a, b| gantt_issue_compare(a, b, issues) }
       end
   
-      # Fixes issues sorting as per http://www.redmine.org/issues/7335
       def gantt_issue_compare(x, y, issues = nil)
-        [(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
+        if x.root_id == y.root_id
+          x.lft <=> y.lft
+        else
+          x.root_id <=> y.root_id
+        end
+        #[(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
       end
       
       def current_limit
