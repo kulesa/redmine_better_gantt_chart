@@ -1,6 +1,17 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe 'Improved issue dependencies management' do
+  # Useful for debugging - draws ASCII gantt chart
+  def draw_tasks(start, tasks)
+    tasks.each { |t| t.reload }
+    tasks.each { |task| draw_from_date(start, task) }
+  end
+
+  def draw_from_date(date_from, issue)
+    start_date = issue.start_date
+    due_date = issue.due_date || issue.start_date
+    puts " "*(start_date - date_from) + "#"*(due_date - start_date)
+  end
 
   before(:each) do 
      @first_issue, @second_issue = create_related_issues("precedes")
@@ -109,7 +120,38 @@ describe 'Improved issue dependencies management' do
         other_child.reload
         puts "other child due: #{other_child.due_date}, parent due: #{parent.due_date}"
         child.destroy
-        
+    end
+    
+
+    it "should reschedule start date of parent task of a dependend child task" do
+      parent_a = Factory(:issue)
+      child_a = Factory.build(:issue, :start_date => parent_a.start_date)
+      child_b = Factory.build(:issue, :start_date => parent_a.start_date)
+      child_a.parent_issue_id = parent_a.id
+      child_b.parent_issue_id = parent_a.id
+      child_a.save!
+      child_b.save!
+
+      child_a, child_b = create_related_issues("precedes", child_a, child_b)
+
+      parent_b = Factory(:issue)
+      child_c = Factory.build(:issue, :start_date => parent_b.start_date)
+      child_d = Factory.build(:issue, :start_date => parent_b.start_date)
+      child_c.parent_issue_id = parent_b.id
+      child_d.parent_issue_id = parent_b.id
+      child_c.save!
+      child_d.save!
+
+      child_b, child_c = create_related_issues("precedes", child_b, child_c)
+      child_c, child_d = create_related_issues("precedes", child_c, child_d)
+
+      parent_b.reload
+
+      lambda {
+        child_a.due_date = child_a.due_date - 2.days
+        child_a.save!
+        parent_b.reload
+      }.should change(parent_b, :start_date).to(parent_b.start_date - 2.days)
     end
   end
 end

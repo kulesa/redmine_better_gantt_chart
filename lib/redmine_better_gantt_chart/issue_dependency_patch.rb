@@ -143,17 +143,17 @@ module RedmineBetterGanttChart
           end
         end
 
-        if cached_value(issue, :start_date) < min_parent_start(current_parent_id)
+        if cached_value(issue, :start_date) <= min_parent_start(current_parent_id)
           cache_change(issue.parent, :start_date => cached_value(issue, :start_date), :parent => true)
         end
 
-        if cached_value(issue, :due_date) > max_parent_due(current_parent_id)
+        if cached_value(issue, :due_date) >= max_parent_due(current_parent_id)
           cache_change(issue.parent, :due_date => cached_value(issue, :due_date), :parent => true)
         end
       end
 
       def min_parent_start(current_parent_id)
-        @parents[current_parent_id].uniq.inject(Date.new) do |min, child_id|
+        @parents[current_parent_id].uniq.inject(Date.new(5000)) do |min, child_id| # Someone needs to update this before 01/01/5000
           min = min < (current_child_start = cached_value(child_id, :start_date)) ? min : current_child_start
         end
       end
