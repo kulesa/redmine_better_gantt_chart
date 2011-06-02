@@ -147,11 +147,15 @@ describe 'Improved issue dependencies management' do
 
       parent_b.reload
 
-      lambda {
-        child_a.due_date = child_a.due_date - 2.days
-        child_a.save!
-        parent_b.reload
-      }.should change(parent_b, :start_date).to(parent_b.start_date - 2.days)
+      parent_start  = parent_b.start_date
+      parent_due    = parent_b.due_date 
+
+      child_a.due_date = child_a.due_date - 2.days
+      child_a.save!
+      parent_b.reload
+
+      parent_b.start_date.should == parent_start - 2.days
+      parent_b.due_date.should   == parent_due - 2.days
     end
   end
 end

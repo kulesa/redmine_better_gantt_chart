@@ -52,6 +52,8 @@ module RedmineBetterGanttChart
         @changes = {} # a hash of changes to be applied later, will contain values like this: { issue_id => {:start_date => ..., :end_date => ...}}
         @parents = {} # a hash of children for any affected parent issue
         yield
+        # Align parents start and end dates
+        reschedule_parents()
         # Sorting of cached changes by due_date should let pass start_date validations if issues are updated in this order.
         ordered_changes = []
         @changes.each {|c| ordered_changes << [c[1][:due_date] || c[1][:start_date], c]}
@@ -73,17 +75,30 @@ module RedmineBetterGanttChart
         end
       end
 
+      def reschedule_parents
+        @parents.each_key do |parent_id|
+          cache_change(parent_id, :start_date => min_parent_start(parent_id), 
+                                  :due_date   => max_parent_due(parent_id))
+        end
+      end
       # Caches changes to be applied later. If no attributes to change given, just caches current values.
       # Use :parent => true to just change one date without changing the other. If :parent is not specified, 
       # change of one of the issue dates will cause change of the other.
       #
       # If no options is provided existing, issue cache is initialized.
       def cache_change(issue, options = {})
-        @changes[issue.id] ||= {}
+        if issue.is_a?(Integer)
+          issue_id = issue
+          issue = Issue.find(issue_id) unless options[:start_date] && options[:due_date] # optimization for the case when issue is not required
+        else
+          issue_id = issue.id
+        end
+
+        @changes[issue_id] ||= {}
         if options.empty?
           # Just caching current values, if issue cache doesn't exist yet
-          new_start_date = issue.start_date unless @changes[issue.id][:start_date]
-          new_due_date   = issue.due_date unless @changes[issue.id][:due_date]
+          new_start_date = issue.start_date unless @changes[issue_id][:start_date]
+          new_due_date   = issue.due_date unless @changes[issue_id][:due_date]
 
         elsif options[:start_date] && options[:due_date]
           # Changing both dates
@@ -107,19 +122,18 @@ module RedmineBetterGanttChart
             new_start_date = issue.start_date + (issue.due_date - new_due_date)
           end
         end
-        @changes[issue.id][:start_date] = new_start_date.to_date if new_start_date
-        @changes[issue.id][:due_date]   = new_due_date.to_date if new_due_date
+        @changes[issue_id][:start_date] = new_start_date.to_date if new_start_date
+        @changes[issue_id][:due_date]   = new_due_date.to_date if new_due_date
       end
 
       # Returns cached value or caches it if it hasn't been cached yet
       def cached_value(issue, attr)
         if issue.is_a?(Integer)
           issue_id = issue
-          issue = Issue.find(issue_id) unless @changes[issue_id]
         else
           issue_id = issue.id
         end
-        cache_change(issue) unless @changes[issue_id]
+        cache_change(issue_id) unless @changes[issue_id]
         case attr
         when :start_date
           @changes[issue_id][:start_date]
@@ -141,14 +155,6 @@ module RedmineBetterGanttChart
             cache_change(child) unless @changes[child]
             @parents[current_parent_id] << child.id
           end
-        end
-
-        if cached_value(issue, :start_date) <= min_parent_start(current_parent_id)
-          cache_change(issue.parent, :start_date => cached_value(issue, :start_date), :parent => true)
-        end
-
-        if cached_value(issue, :due_date) >= max_parent_due(current_parent_id)
-          cache_change(issue.parent, :due_date => cached_value(issue, :due_date), :parent => true)
         end
       end
 
