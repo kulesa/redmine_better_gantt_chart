@@ -110,8 +110,11 @@ module Redmine
       # the Gantt chart.  This will recurse for each subproject.
       # Adds cross-project related issues to counting
       def number_of_rows_on_project(project)
-        count = self.number_of_rows_on_project(project)
-        count += project.cross_project_related_issues
+        return 0 unless projects.include?(project)
+
+        count = 1
+        count += project_issues(project).size
+        count += project_versions(project).size
         count
       end
 
