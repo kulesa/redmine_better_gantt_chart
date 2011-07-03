@@ -28,11 +28,17 @@ module RedmineBetterGanttChart
         # If this is a PARENT issue
         if !issue.leaf?
           issue.leaves.each do |leaf|
-            # Tricky thing: if start date of an issue equals to the parent's start date, I *assume* that change of parent's start date
-            # must trigger change of the child's start date. That might NOT be the case.
-            if (cached_value(issue, :start_date) > cached_value(leaf, :start_date)) or
-               (cached_value(issue, :start_date) < cached_value(leaf, :start_date) and issue.start_date == leaf.start_date)
-              reschedule_dependent_issue(leaf, :start_date => cached_value(issue, :start_date))
+            # if parent task has start == nil, change to start date of the child
+            start_date =       cached_value(issue, :start_date) 
+            child_start_date = cached_value(leaf, :start_date)
+
+            if start_date.nil?
+              cache_change(issue, :start_date => child_start_date)
+            end
+
+            if (start_date > child_start_date) or
+               (start_date < child_start_date and issue.start_date == leaf.start_date)
+              reschedule_dependent_issue(leaf, :start_date => start_date)
             end
           end
         end

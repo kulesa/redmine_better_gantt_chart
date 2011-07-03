@@ -54,6 +54,16 @@ describe 'Improved issue dependencies management' do
       child_issue.save!
     }.should_not raise_error(NoMethodError)
   end
+
+  it "doesn't fail when an issue without start or due date becomes a parent issue" do
+    parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue = Factory(:issue, :due_date => nil)
+
+    lambda {
+      child_issue.parent_issue_id = parent_issue.id
+      child_issue.save!
+    }.should_not raise_error(NoMethodError)
+  end
   
    describe 'handles long dependency chains' do
      before do
