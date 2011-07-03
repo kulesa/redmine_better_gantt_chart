@@ -42,6 +42,19 @@ describe 'Improved issue dependencies management' do
      }.should raise_error(ActiveRecord::RecordInvalid)
    end
   
+  it "doesn't fail when removing an only child issue from the parent" do
+    parent_issue, next_issue = create_related_issues("precedes")
+    child_issue = Factory(:issue)
+    child_issue.parent_issue_id = parent_issue.id
+    child_issue.save!
+    parent_issue.reload
+
+    lambda {
+      child_issue.parent_issue_id = nil
+      child_issue.save!
+    }.should_not raise_error(NoMethodError)
+  end
+  
    describe 'handles long dependency chains' do
      before do
        @start_issue = Factory(:issue)
@@ -159,4 +172,3 @@ describe 'Improved issue dependencies management' do
     end
   end
 end
-

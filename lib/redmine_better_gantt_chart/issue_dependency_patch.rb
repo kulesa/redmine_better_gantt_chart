@@ -39,7 +39,9 @@ module RedmineBetterGanttChart
 
         issue.relations_from.each do |relation|
           if relation.issue_to && relation.relation_type == IssueRelation::TYPE_PRECEDES
-            reschedule_dependent_issue(relation.issue_to, :start_date => cached_value(issue, :due_date) + relation.delay + 1)
+            if due_date = cached_value(issue, :due_date)
+              reschedule_dependent_issue(relation.issue_to, :start_date => due_date + relation.delay + 1)
+            end
           end
         end
 
