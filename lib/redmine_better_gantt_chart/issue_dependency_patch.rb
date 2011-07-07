@@ -76,7 +76,7 @@ module RedmineBetterGanttChart
                 changes.delete(key) if issue.send(key) == value.to_date
               end
               unless changes.empty?
-                issue.update_attributes!(changes)
+                issue.update_attributes(changes)
               end
             end
           end
