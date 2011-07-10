@@ -209,7 +209,7 @@ module Redmine
         end
 
         versions = project_versions(project)
-        versions.each do |version|
+        versions.sort.each do |version|
           render_version(project, version, options)
         end
 
