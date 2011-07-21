@@ -143,7 +143,7 @@ if show_days
 	wday = @gantt.date_from.cwday
 	(@gantt.date_to - @gantt.date_from + 1).to_i.times do 
 	width =  zoom - 1
-        day_abbr = ["zh", "zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
+        day_abbr = [:"zh", :"zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
 	%>
 	<div style="left:<%= left %>px;top:37px;width:<%= width %>px;height:<%= height %>px;font-size:0.7em;<%= "background:#f1f1f1;" if wday > 5 %>" class="gantt_hdr">
 	<%= day_abbr %>
