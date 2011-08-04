@@ -55,6 +55,22 @@ describe 'Improved issue dependencies management' do
     }.should_not raise_error(NoMethodError)
   end
 
+  it "doesn't fail when assigning start_date to a child issue when parent's start_date is empty and siblings' start_dates are empty" do
+    parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue2 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1.parent_issue_id = parent_issue.id
+    child_issue2.parent_issue_id = parent_issue.id
+    child_issue1.save!
+    child_issue2.save!
+    parent_issue.reload
+
+    lambda {
+      child_issue1.start_date = Date.today
+      child_issue1.save!
+    }.should_not raise_error(ArgumentError)
+  end
+
   it "doesn't fail when an issue without start or due date becomes a parent issue" do
     parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
     child_issue = Factory(:issue, :due_date => nil)

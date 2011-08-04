@@ -27,6 +27,8 @@ module RedmineBetterGanttChart
 
         # If this is a PARENT issue
         if !issue.leaf?
+          childs_with_nil_start_dates = []
+
           issue.leaves.each do |leaf|
             # if parent task has start == nil, change to start date of the child
             start_date =       cached_value(issue, :start_date) 
@@ -84,9 +86,17 @@ module RedmineBetterGanttChart
       end
 
       def reschedule_parents
-        @parents.each_key do |parent_id|
-          cache_change(parent_id, :start_date => min_parent_start(parent_id), 
-                                  :due_date   => max_parent_due(parent_id))
+        @parents.each_pair do |parent_id, children|
+          parent_min_start = min_parent_start(parent_id)
+          parent_max_start = max_parent_due(parent_id)
+          cache_change(parent_id, :start_date => parent_min_start, 
+                                  :due_date   => parent_max_start)
+
+          children.each do |child| # If parent's start is changing, change start_date of any childs that have empty start_date
+            if cached_value(child, :start_date).nil?
+              cache_change(child, :start_date => parent_min_start, :parent => true)
+            end
+          end
         end
       end
       # Caches changes to be applied later. If no attributes to change given, just caches current values.
@@ -168,13 +178,13 @@ module RedmineBetterGanttChart
 
       def min_parent_start(current_parent_id)
         @parents[current_parent_id].uniq.inject(Date.new(5000)) do |min, child_id| # Someone needs to update this before 01/01/5000
-          min = min < (current_child_start = cached_value(child_id, :start_date)) ? min : current_child_start
+          min = min < (current_child_start = cached_value(child_id, :start_date)) ? min : current_child_start rescue min
         end
       end
 
       def max_parent_due(current_parent_id)
         @parents[current_parent_id].uniq.inject(Date.new) do |max, child_id|
-          max = max > (current_child_due = cached_value(child_id, :due_date)) ? max : current_child_due
+          max = max > (current_child_due = cached_value(child_id, :due_date)) ? max : current_child_due rescue max
         end
       end
 
