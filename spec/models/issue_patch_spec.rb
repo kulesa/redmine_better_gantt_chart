@@ -71,6 +71,35 @@ describe 'Improved issue dependencies management' do
     }.should_not raise_error(ArgumentError)
   end
 
+  it "doesn't fail when start_date of an issue deep in hierarchy is changed from empty" do
+    parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue2 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1.parent_issue_id = parent_issue.id
+    child_issue2.parent_issue_id = parent_issue.id
+    child_issue1.save!
+    child_issue2.save!
+
+    child_issue1_1 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1_2 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue1_1.parent_issue_id = child_issue1.id
+    child_issue1_2.parent_issue_id = child_issue1.id
+    child_issue1_1.save!
+    child_issue1_2.save!
+
+    child_issue2_1 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue2_2 = Factory(:issue, :start_date => nil, :due_date => nil)
+    child_issue2_1.parent_issue_id = child_issue2.id
+    child_issue2_2.parent_issue_id = child_issue2.id
+    child_issue2_1.save!
+    child_issue2_2.save!
+
+    lambda {
+      child_issue2_2.start_date = Date.today
+      child_issue2_2.save!
+    }.should_not raise_error(ArgumentError)
+  end
+
   it "doesn't fail when an issue without start or due date becomes a parent issue" do
     parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
     child_issue = Factory(:issue, :due_date => nil)
@@ -157,7 +186,6 @@ describe 'Improved issue dependencies management' do
         other_child.save!
         parent.reload
         other_child.reload
-        puts "other child due: #{other_child.due_date}, parent due: #{parent.due_date}"
         child.destroy
     end
     

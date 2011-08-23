@@ -38,7 +38,8 @@ module RedmineBetterGanttChart
               cache_change(issue, :start_date => child_start_date)
             end
 
-            if (start_date > child_start_date) or
+            if child_start_date.nil? or 
+               (start_date > child_start_date) or
                (start_date < child_start_date and issue.start_date == leaf.start_date)
               reschedule_dependent_issue(leaf, :start_date => start_date)
             end
@@ -126,10 +127,12 @@ module RedmineBetterGanttChart
         elsif options[:start_date]
           # Start date changed => change the due date
           new_start_date = options[:start_date]
-          if options[:parent]
-            new_due_date = issue.due_date
-          else
-            new_due_date = issue.due_date + (new_start_date - issue.start_date)
+          unless issue.due_date.nil?
+            if options[:parent]
+              new_due_date = issue.due_date
+            else
+              new_due_date = issue.due_date + (new_start_date - issue.start_date)
+            end
           end
         elsif options[:due_date]
           # Due date changed => change the start date
