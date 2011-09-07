@@ -33,7 +33,7 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
   author 'Alexey Kuleshov'
   description 'This plugin improves Redmine Gantt Chart'
   version '0.5.3'
-  url 'http://github.com/kulesa/redmine_issue_dependency'
+  url 'https://github.com/kulesa/redmine_better_gantt_chart'
   author_url 'http://github.com/kulesa'
   
   requires_redmine :version_or_higher => '1.1.0'
