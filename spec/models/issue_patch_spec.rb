@@ -115,7 +115,7 @@ describe 'Improved issue dependencies management' do
        @start_issue = Factory(:issue)
        @current_issue = @start_issue
        # Change X.times to a really big number to stress test rescheduling of a really long chain of dependent issues :)
-       20.times do
+       3.times do
          previous_issue, @current_issue = create_related_issues("precedes", @current_issue)
        end
      end

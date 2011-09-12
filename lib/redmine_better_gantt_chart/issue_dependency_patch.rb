@@ -21,69 +21,75 @@ module RedmineBetterGanttChart
         end
       end
 
-      # Prepare changes for all dependent issues
-      def reschedule_dependent_issue(issue = self, options = {}) #start_date_to = nil, due_date_to = nil
-        cache_change(issue, options)
-
-        # If this is a PARENT issue
-        if !issue.leaf?
-          childs_with_nil_start_dates = []
-
-          issue.leaves.each do |leaf|
-            # if parent task has start == nil, change to start date of the child
-            start_date =       cached_value(issue, :start_date) 
-            child_start_date = cached_value(leaf, :start_date)
-
-            if start_date.nil?
-              cache_change(issue, :start_date => child_start_date)
-            end
-
-            if child_start_date.nil? or 
-               (start_date > child_start_date) or
-               (start_date < child_start_date and issue.start_date == leaf.start_date)
-              reschedule_dependent_issue(leaf, :start_date => start_date)
-            end
-          end
-        end
-
-        issue.relations_from.each do |relation|
-          if relation.issue_to && relation.relation_type == IssueRelation::TYPE_PRECEDES
-            if due_date = cached_value(issue, :due_date)
-              reschedule_dependent_issue(relation.issue_to, :start_date => due_date + relation.delay + 1)
-            end
-          end
-        end
-
-        # If this is a CHILD issue - update parent's start and due dates
-        update_parent_start_and_due(issue) if issue.parent_id
-      end
-
-      # Cache changes, and apply them in transaction
       def cache_and_apply_changes(&block)
         @changes = {} # a hash of changes to be applied later, will contain values like this: { issue_id => {:start_date => ..., :end_date => ...}}
         @parents = {} # a hash of children for any affected parent issue
+
         yield
-        # Align parents start and end dates
-        reschedule_parents()
-        # Sorting of cached changes by due_date should let pass start_date validations if issues are updated in this order.
-        ordered_changes = []
-        @changes.each {|c| ordered_changes << [c[1][:due_date] || c[1][:start_date], c]}
-        ordered_changes.sort!
-        # Let's disable all calbacks for now
+
+        reschedule_parents
+        ordered_changes = prepare_and_sort_changes_list(@changes)
+
         Issue.with_all_callbacks_disabled do
           transaction do
             ordered_changes.each do |the_changes|
               issue_id, changes = the_changes[1]
-              issue = Issue.find(issue_id)
-              changes.each_pair do |key, value|
-                changes.delete(key) if issue.send(key) == value.to_date
-              end
-              unless changes.empty?
-                issue.update_attributes(changes)
-              end
+              apply_issue_changes(issue_id, changes)
             end
           end
         end
+      end
+
+      def prepare_and_sort_changes_list(changes_list)
+        ordered_changes = []
+        changes_list.each do |c| 
+          ordered_changes << [c[1][:due_date] || c[1][:start_date], c]
+        end
+        ordered_changes.sort!
+      end
+
+      def apply_issue_changes(issue_id, changes)
+        issue = Issue.find(issue_id)
+        changes.each_pair do |key, value|
+          changes.delete(key) if issue.send(key) == value.to_date
+        end
+        issue.update_attributes(changes) unless changes.empty?
+      end
+
+      def reschedule_dependent_issue(issue = self, options = {}) #start_date_to = nil, due_date_to = nil
+        cache_change(issue, options)
+        process_child_issues(issue) if !issue.leaf?
+        process_following_issues(issue)
+        update_parent_start_and_due(issue) if issue.parent_id
+      end
+
+      def process_child_issues(issue)
+        childs_with_nil_start_dates = []
+
+        issue.leaves.each do |leaf|
+          start_date =       cached_value(issue, :start_date) 
+          child_start_date = cached_value(leaf, :start_date)
+
+          cache_change(issue, :start_date => child_start_date) if start_date.nil?
+
+          if child_start_date.nil? or 
+             (start_date > child_start_date) or
+             (start_date < child_start_date and issue.start_date == leaf.start_date)
+            reschedule_dependent_issue(leaf, :start_date => start_date)
+          end
+        end
+      end
+
+      def process_following_issues(issue)
+        issue.relations_from.each do |relation|
+          if is_a_link_with_following_issue?(relation) && due_date = cached_value(issue, :due_date)
+              reschedule_dependent_issue(relation.issue_to, :start_date => due_date + relation.delay + 1)
+          end
+        end
+      end
+
+      def is_a_link_with_following_issue?(relation)
+        relation.issue_to && relation.relation_type == IssueRelation::TYPE_PRECEDES
       end
 
       def reschedule_parents
@@ -100,6 +106,7 @@ module RedmineBetterGanttChart
           end
         end
       end
+      
       # Caches changes to be applied later. If no attributes to change given, just caches current values.
       # Use :parent => true to just change one date without changing the other. If :parent is not specified, 
       # change of one of the issue dates will cause change of the other.
