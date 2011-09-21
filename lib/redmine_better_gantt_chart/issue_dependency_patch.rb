@@ -121,53 +121,38 @@ module RedmineBetterGanttChart
         end
 
         @changes[issue_id] ||= {}
-        if options.empty?
-          # Just caching current values, if issue cache doesn't exist yet
-          new_start_date = issue.start_date unless @changes[issue_id][:start_date]
-          new_due_date   = issue.due_date unless @changes[issue_id][:due_date]
+        new_dates = {}
 
-        elsif options[:start_date] && options[:due_date]
-          # Changing both dates
-          new_start_date = options[:start_date]
-          new_due_date   = options[:due_date]
+        if options.empty? || (options[:start_date] && options[:due_date])
+          # Both or none dates changed
+          [:start_date, :due_date].each do |attr|
+            new_dates[attr] = options[attr] || @changes[issue_id][attr] || issue.send(attr)
+          end
+        else
+          # One of the dates changed - change another accordingly
+          changed_attr = options[:start_date] && :start_date || :due_date
+          other_attr   = if changed_attr == :start_date then :due_date else :start_date end
 
-        elsif options[:start_date]
-          # Start date changed => change the due date
-          new_start_date = options[:start_date]
-          unless issue.due_date.nil?
+          new_dates[changed_attr] = options[changed_attr]
+          if issue.send(other_attr)
             if options[:parent]
-              new_due_date = issue.due_date
+              new_dates[other_attr] = issue.send(other_attr)
             else
-              new_due_date = issue.due_date + (new_start_date - issue.start_date)
+              new_dates[other_attr] = issue.send(other_attr) + (new_dates[changed_attr] - issue.send(changed_attr))
             end
           end
-        elsif options[:due_date]
-          # Due date changed => change the start date
-          new_due_date = options[:due_date]
-          if options[:parent]
-            new_start_date = issue.start_date
-          else
-            new_start_date = issue.start_date + (issue.due_date - new_due_date)
-          end
         end
-        @changes[issue_id][:start_date] = new_start_date.to_date if new_start_date
-        @changes[issue_id][:due_date]   = new_due_date.to_date if new_due_date
+
+        [:start_date, :due_date].each do |attr|
+          @changes[issue_id][attr] = new_dates[attr].to_date if new_dates[attr]
+        end
       end
 
       # Returns cached value or caches it if it hasn't been cached yet
       def cached_value(issue, attr)
-        if issue.is_a?(Integer)
-          issue_id = issue
-        else
-          issue_id = issue.id
-        end
+        issue_id = issue.is_a?(Integer) ? issue : issue.id 
         cache_change(issue_id) unless @changes[issue_id]
-        case attr
-        when :start_date
-          @changes[issue_id][:start_date]
-        when :due_date
-          @changes[issue_id][:due_date] || @changes[issue_id][:start_date]
-        end
+        @changes[issue_id][attr] || @changes[issue_id][:start_date]
       end
 
       # Each time we update cache of a child issue, need to update cache of the parent issue
