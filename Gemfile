@@ -8,6 +8,7 @@ group :test do
   gem 'rails', '2.3.11'
   gem 'activesupport', '2.3.11'
   gem 'activerecord', '2.3.11'
+  gem 'rubytree', '0.7.0'
   gem 'sqlite3'
   gem 'mysql'
   gem 'rspec', "~>1.3"
