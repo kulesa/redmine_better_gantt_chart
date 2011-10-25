@@ -23,4 +23,5 @@ group :test do
   gem 'edavis10-object_daddy'
   gem 'mocha'
   gem 'redmine_plugin_support'
+  gem 'test-unit', '1.2.3'
 end

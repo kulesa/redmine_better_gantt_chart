@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path('../../spec_helper', __FILE__)
 
 describe 'Improved issue dependencies management' do
   # Useful for debugging - draws ASCII gantt chart
