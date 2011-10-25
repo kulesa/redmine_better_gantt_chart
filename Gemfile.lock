@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   remote: http://gems.github.com/
   specs:
+    RedCloth (4.2.7)
     actionmailer (2.3.11)
       actionpack (= 2.3.11)
     actionpack (2.3.11)
@@ -86,6 +87,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  RedCloth (>= 4.2.7)
   activerecord (= 2.3.11)
   activesupport (= 2.3.11)
   coderay (= 0.9.7)
