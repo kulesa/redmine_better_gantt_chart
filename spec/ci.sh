@@ -1,7 +1,7 @@
 echo "Setting up dummy Redmine"
 git clone https://github.com/edavis10/redmine.git spec/dummy_redmine 
-echo "Checking out branch 1.2"
-cd spec/dummy_redmine && git checkout origin/1.2-stable
+echo "Checking out branch 1.3"
+cd spec/dummy_redmine && git checkout origin/1.3-stable
 echo "Copying database.yml"
 cp ../ci_config/database.ci.yml config/database.yml  
 echo "Migrating database"

@@ -3,16 +3,16 @@ GEM
   remote: http://gems.github.com/
   specs:
     RedCloth (4.2.7)
-    actionmailer (2.3.11)
-      actionpack (= 2.3.11)
-    actionpack (2.3.11)
-      activesupport (= 2.3.11)
+    actionmailer (2.3.14)
+      actionpack (= 2.3.14)
+    actionpack (2.3.14)
+      activesupport (= 2.3.14)
       rack (~> 1.1.0)
-    activerecord (2.3.11)
-      activesupport (= 2.3.11)
-    activeresource (2.3.11)
-      activesupport (= 2.3.11)
-    activesupport (2.3.11)
+    activerecord (2.3.14)
+      activesupport (= 2.3.14)
+    activeresource (2.3.14)
+      activesupport (= 2.3.14)
+    activesupport (2.3.14)
     builder (3.0.0)
     capybara (1.1.1)
       mime-types (>= 1.16)
@@ -55,12 +55,12 @@ GEM
     rack (1.1.0)
     rack-test (0.6.1)
       rack (>= 1.0)
-    rails (2.3.11)
-      actionmailer (= 2.3.11)
-      actionpack (= 2.3.11)
-      activerecord (= 2.3.11)
-      activeresource (= 2.3.11)
-      activesupport (= 2.3.11)
+    rails (2.3.14)
+      actionmailer (= 2.3.14)
+      actionpack (= 2.3.14)
+      activerecord (= 2.3.14)
+      activeresource (= 2.3.14)
+      activesupport (= 2.3.14)
       rake (>= 0.8.3)
     rake (0.9.2)
     redmine_plugin_support (0.0.4)
@@ -88,8 +88,8 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth (>= 4.2.7)
-  activerecord (= 2.3.11)
-  activesupport (= 2.3.11)
+  activerecord (= 2.3.14)
+  activesupport (= 2.3.14)
   coderay (= 0.9.7)
   cucumber
   cucumber-rails
@@ -100,7 +100,7 @@ DEPENDENCIES
   mocha
   mysql
   rack (= 1.1.0)
-  rails (= 2.3.11)
+  rails (= 2.3.14)
   rake
   redmine_plugin_support
   rspec (~> 1.3)
