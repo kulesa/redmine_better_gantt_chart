@@ -1,0 +1,18 @@
+<p>
+<label for="settings_calculate_duration"><%= h l(:calculate_issue_duration_label) %>:</label>
+<%= check_box_tag('settings[calculate_duration]', @settings['calculate_duration'], @settings['calculate_duration']) %>
+</p>
+<p>
+When enabled, issue attribute 'Estimated duration' is available for manual entry. If both start and finish dates are specified, 
+estimated duration is calculated based on the difference between the dates and 'Schedule on weekends' parameter. 
+If only one of the dates and estimated duration is provided, the other date is calculated automatically.
+</p>
+<p>
+<label for="settings_schedule_on_weekends"><%= h l(:schedule_on_weekends_label) %>:</label>
+<%= check_box_tag('settings[schedule_on_weekends]', @settings['schedule_on_weekends'], @settings['schedule_on_weekends']) %>
+</p>
+<p>
+If enabled, issues can start and finish on weekends. If disabled, rescheduling of related issues will
+move start or end date to Monday if the date falls to a weekend. Note, that in any case start and finish
+dates can be set to a weekend manually.
+</p>
