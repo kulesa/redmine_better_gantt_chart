@@ -33,18 +33,20 @@ describe IssuesController do
 
   context "when calculation of estimated duration is disabled" do
     before  do
-      configure_plugin 'calculate_duration' => true
+      configure_plugin 'calculate_duration' => false
     end
 
     describe "#show" do
       it "should NOT show estimated duration in issue details" do
-        pending
+        get :show, :id => issue.id
+        response.should_not have_text(/th class=.estimated_duration./)
       end
     end
 
     describe "#edit" do
       it "should NOT show estimated duration on issue form" do
-        pending
+        get :edit, :id => issue.id
+        response.should_not have_text(/input id=.issue_estimated_duration./)
       end
     end
   end
