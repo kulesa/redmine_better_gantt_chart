@@ -11,12 +11,14 @@ require 'factory_girl'
 require 'database_cleaner'
 
 require File.expand_path(File.dirname(__FILE__) + '/factories.rb')
+require File.expand_path(File.dirname(__FILE__) + '/helpers')
 
 Spec::Runner.configure do |config|
   DatabaseCleaner.strategy = :truncation
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures  = false
   config.fixture_path = RAILS_ROOT + '/spec/fixtures/'
+  config.include Helpers
 
   config.before(:suite) do 
     DatabaseCleaner.clean
