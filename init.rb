@@ -45,5 +45,6 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
 end
 
 require 'redmine_better_gantt_chart/redmine_better_gantt_chart'
+require 'redmine_better_gantt_chart/calendar'
 require 'redmine_better_gantt_chart/hooks/view_issues_show_details_bottom_hook'
 require 'redmine_better_gantt_chart/hooks/view_issues_form_details_bottom_hook'
