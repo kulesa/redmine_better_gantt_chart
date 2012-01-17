@@ -12,4 +12,10 @@ module Helpers
     puts " "*(start_date - date_from) + "#"*(due_date - start_date)
   end
 
+  # Returns nearest requested day of week, for example
+  # next_day_of_week(5) will return next Friday
+  def next_day_of_week(wday)
+    Date.today + wday - Date.today.wday
+  end
+
 end
