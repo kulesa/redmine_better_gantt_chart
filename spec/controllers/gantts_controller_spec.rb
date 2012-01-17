@@ -75,6 +75,6 @@ describe GanttsController, '#show' do
     @one_issue.save!
 
     get :show
-    response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}' relates='#{@one_issue.id}'/)
+    response.should have_text(/duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}' relates='#{@one_issue.id}'|relates='#{@one_issue.id}' duplicated='#{@duplicates_issue.id},#{@blocks_issue.id}'/)
   end
 end
