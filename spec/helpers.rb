@@ -1,4 +1,21 @@
 module Helpers
+  def create_related_issues(relation_type, from_issue = Factory(:issue), to_issue = Factory(:issue))
+    from_issue.relations << IssueRelation.create!(:issue_from => from_issue, :issue_to => to_issue, :relation_type => relation_type)
+    from_issue.save!
+    [from_issue, to_issue].map(&:reload)
+  end
+
+  def relate_issues(from_issue, to_issue, relation_type = 'precedes')
+   from_issue.relations <<  IssueRelation.create!(:issue_from => from_issue, :issue_to => to_issue, :relation_type => relation_type)
+   from_issue.save!
+  end
+
+  def configure_plugin(settings = {})
+    Setting['plugin_redmine_better_gantt_chart'] = {
+      'calculate_duration' => true,
+      'schedule_on_weekends' => true
+    }.merge(settings)
+  end
   
   # Useful for debugging - draws ASCII gantt chart
   def draw_tasks(start, tasks)
