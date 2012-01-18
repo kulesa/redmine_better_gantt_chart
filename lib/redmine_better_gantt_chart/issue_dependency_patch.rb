@@ -7,6 +7,7 @@ module RedmineBetterGanttChart
         alias_method_chain :reschedule_following_issues, :fast_update
         alias_method_chain :reschedule_after, :earlier_date
         alias_method_chain :soonest_start, :dependent_parent_validation
+        alias_method_chain :duration, :work_days
       end
     end
   
@@ -83,7 +84,8 @@ module RedmineBetterGanttChart
       def process_following_issues(issue)
         issue.relations_from.each do |relation|
           if is_a_link_with_following_issue?(relation) && due_date = cached_value(issue, :due_date)
-              reschedule_dependent_issue(relation.issue_to, :start_date => due_date + relation.delay + 1)
+            new_start_date = RedmineBetterGanttChart::Calendar.workdays_from_date(due_date, relation.delay) + 1.day
+            reschedule_dependent_issue(relation.issue_to, :start_date => new_start_date)
           end
         end
       end
@@ -138,7 +140,7 @@ module RedmineBetterGanttChart
             if options[:parent]
               new_dates[other_attr] = issue.send(other_attr)
             else
-              new_dates[other_attr] = issue.send(other_attr) + (new_dates[changed_attr] - issue.send(changed_attr))
+              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(issue.send(other_attr), new_dates[changed_attr] - issue.send(changed_attr))
             end
           end
         end
@@ -183,12 +185,22 @@ module RedmineBetterGanttChart
         end
       end
 
+      # Returns the time scheduled for this issue in working days.
+      #
+      def duration_with_work_days
+        if start_date && due_date
+          RedmineBetterGanttChart::Calendar.workdays_between(start_date, due_date)
+        else
+          0
+        end
+      end
+
       # Changes behaviour of reschedule_after method
       def reschedule_after_with_earlier_date(date)      
         return if date.nil?
         if start_date.nil? || start_date != date
           if leaf?
-            self.start_date, self.due_date = date, date + duration
+            self.start_date, self.due_date = date, RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration)
           else
             self.start_date = date
           end
