@@ -201,7 +201,7 @@ module RedmineBetterGanttChart
         return if date.nil?
         if start_date.nil? || start_date != date
           if leaf?
-            self.start_date, self.due_date = date, RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration)
+            self.start_date, self.due_date = date, RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration - 1)
           else
             self.start_date = date
           end

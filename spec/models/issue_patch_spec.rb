@@ -233,5 +233,16 @@ describe 'Improved issue dependencies management' do
       issue = Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1.week)
       issue.duration.should == 6
     end
+
+    it "should reschedule after with earlier date" do
+      monday = RedmineBetterGanttChart::Calendar.next_day_of_week(1)
+      @first_issue  = Factory(:issue, :start_date => monday, :due_date => monday + 1)
+      @second_issue = Factory(:issue, :start_date => monday, :due_date => monday + 1)
+
+      lambda {
+        relate_issues(@first_issue, @second_issue)
+      }.should change(@second_issue, :due_date).to(monday + 3)
+
+    end
   end
 end
