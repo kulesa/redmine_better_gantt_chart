@@ -19,6 +19,11 @@ describe RedmineBetterGanttChart::Calendar do
     subject.next_day_of_week(yesterday_date_of_week).should == Date.today + 6.days
   end
 
+  it "should tell previous requested day of week" do
+    tomorrow_day_of_week = Date.tomorrow.wday
+    subject.previous_day_of_week(tomorrow_day_of_week).should == Date.today - 6.days
+  end
+
   it "should have 8 working days between today and 1 week later if work on weekends enabled" do
     subject.workdays_between(Date.today, Date.today + 1.week).should == 8
   end
@@ -59,6 +64,19 @@ describe RedmineBetterGanttChart::Calendar do
     subject.next_working_day(saturday).should == saturday + 2.days
   end
 
+  it "should tell previous working day is friday if today is friday" do
+    subject.previous_working_day(friday).should == friday
+  end
+
+  it "should tell previous working day is saturday if today is saturday and work on weekends is enabled" do
+    subject.previous_working_day(saturday).should == saturday
+  end
+
+  it "should tell previous working day is friday if today is sunday and work on weekends is disabled" do
+    work_on_weekends false
+    subject.previous_working_day(saturday + 1.day).should == friday
+  end
+
   it "should let calculate finish date based on duration and start date with work on weekends enabled" do
     subject.workdays_from_date(Date.today, 7).should == Date.today + 1.week
   end
@@ -69,6 +87,14 @@ describe RedmineBetterGanttChart::Calendar do
   end
 
   it "should calculate start date based on duration and finish date" do
+    work_on_weekends false
+    previous_friday = friday - 7
+    previous_monday = friday - 4
+    subject.workdays_from_date(friday, -4).should == previous_monday
+    subject.workdays_from_date(friday, -6).should == previous_friday
+  end
+
+  it "should calculate workdays before date" do
     subject.should_receive(:workdays_from_date).with(Date.today, -5)
     subject.workdays_before_date(Date.today, 5)
   end

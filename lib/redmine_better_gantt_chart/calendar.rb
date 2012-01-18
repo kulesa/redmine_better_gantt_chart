@@ -11,11 +11,11 @@ module RedmineBetterGanttChart
     end
 
     def self.next_working_day(date)
-      if RedmineBetterGanttChart.work_on_weekends? || is_a_working_day?(date)
-        date
-      else
-        next_day_of_week(1, date)
-      end
+      the_same_day_or(date) { next_day_of_week(1, date) }
+    end
+
+    def self.previous_working_day(date)
+      the_same_day_or(date) { previous_day_of_week(5, date) }
     end
 
     def self.workdays_from_date(date, shift)
@@ -24,7 +24,15 @@ module RedmineBetterGanttChart
       if RedmineBetterGanttChart.work_on_weekends?
         end_date
       else
-        next_working_day(end_date + weekends_between(date, end_date).days)
+        if shift > 0
+          diff_date = end_date + weekends_between(date, end_date).days
+          next_working_day(diff_date)
+        else
+          weekend_diff = weekends_between(date, end_date)
+          weekend_diff -= 1 if weekend_diff > 0 # don't ask why
+          diff_date = end_date - weekend_diff.days
+          previous_working_day(diff_date)
+        end
       end
     end
 
@@ -39,6 +47,10 @@ module RedmineBetterGanttChart
       from + (wday + 7 - from.wday) % 7
     end
 
+    def self.previous_day_of_week(wday, from = Date.today)
+      from - (from.wday - wday + 7) % 7
+    end
+
     def self.working_days
       RedmineBetterGanttChart.work_on_weekends? ? 0..6 : 1..5
     end
@@ -51,6 +63,14 @@ module RedmineBetterGanttChart
       (date_from..date_to).select do |date|
         yield date
       end.size
+    end
+
+    def self.the_same_day_or(date)
+      if RedmineBetterGanttChart.work_on_weekends? || is_a_working_day?(date)
+        date
+      else
+        yield
+      end
     end
   end
 end
