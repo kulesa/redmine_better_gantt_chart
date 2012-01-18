@@ -11,7 +11,7 @@ module RedmineBetterGanttChart
     end
 
     def self.next_working_day(date)
-      if RedmineBetterGanttChart.schedule_on_weekends? || is_a_working_day?(date)
+      if RedmineBetterGanttChart.work_on_weekends? || is_a_working_day?(date)
         date
       else
         next_day_of_week(1, date)
@@ -21,7 +21,7 @@ module RedmineBetterGanttChart
     def self.workdays_from_date(date, shift)
       end_date = date + shift.days
 
-      if RedmineBetterGanttChart.schedule_on_weekends?
+      if RedmineBetterGanttChart.work_on_weekends?
         end_date
       else
         next_working_day(end_date + weekends_between(date, end_date).days)
@@ -40,7 +40,7 @@ module RedmineBetterGanttChart
     end
 
     def self.working_days
-      RedmineBetterGanttChart.schedule_on_weekends? ? 0..6 : 1..5
+      RedmineBetterGanttChart.work_on_weekends? ? 0..6 : 1..5
     end
 
     def self.is_a_working_day?(date)

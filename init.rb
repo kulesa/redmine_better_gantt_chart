@@ -40,7 +40,7 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
 
   settings(:default => {
     'calculate_duration'   => false,
-    'schedule_on_weekends' => true
+    'work_on_weekends' => true
   }, :partial => "settings/better_gantt_chart_settings")
 end
 

@@ -5,7 +5,7 @@ require File.expand_path('../../../lib/redmine_better_gantt_chart/calendar', __F
 describe RedmineBetterGanttChart::Calendar do
 
   before(:each) do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(true)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(true)
   end
 
   let!(:thursday) { subject.next_day_of_week(4) }
@@ -22,7 +22,7 @@ describe RedmineBetterGanttChart::Calendar do
   end
 
   it "should have 5 working days between today and 1 week later if work on weekends disabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     subject.workdays_between(Date.today, Date.today + 1.week).should == 5
   end
 
@@ -35,7 +35,7 @@ describe RedmineBetterGanttChart::Calendar do
   end
 
   it "should have 5 working days between saturday and next_monday if work on weekends disabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     subject.workdays_between(saturday, saturday + 9).should == 5
   end
 
@@ -49,22 +49,22 @@ describe RedmineBetterGanttChart::Calendar do
   end
 
   it "should tell next working day is saturday if today is saturday and work on weekends is enabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(true)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(true)
     subject.next_working_day(saturday).should == saturday
   end
 
   it "should tell next working day is monday if today is saturday and work on weekends is disabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     subject.next_working_day(saturday).should == saturday + 2.days
   end
 
   it "should let calculate finish date based on duration and start date with work on weekends enabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(true)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(true)
     subject.workdays_from_date(Date.today, 7).should == Date.today + 1.week
   end
 
   it "should let calculate finish date based on duration and start date wihout work on weekends" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     subject.workdays_from_date(Date.today, 5).should == Date.today + 1.week
   end
 
@@ -74,13 +74,13 @@ describe RedmineBetterGanttChart::Calendar do
   end
 
   it "should say that 5 working from saturday is monday if work on weekends disabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     next_monday = saturday + 9.days
     subject.workdays_from_date(saturday, 5).should == next_monday
   end
 
   it "should say that 5 working from sunday is monday if work on weekends disabled" do
-    RedmineBetterGanttChart.stub(:schedule_on_weekends?).and_return(false)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(false)
     sunday = saturday + 1.day
     next_monday = sunday + 8.days
     subject.workdays_from_date(sunday, 5).should == next_monday

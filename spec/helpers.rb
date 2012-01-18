@@ -13,7 +13,7 @@ module Helpers
   def configure_plugin(settings = {})
     Setting['plugin_redmine_better_gantt_chart'] = {
       'calculate_duration' => true,
-      'schedule_on_weekends' => true
+      'work_on_weekends' => true
     }.merge(settings)
   end
   

@@ -3,7 +3,7 @@ module RedmineBetterGanttChart
     Setting['plugin_redmine_better_gantt_chart']['calculate_duration']
   end
 
-  def self.schedule_on_weekends?
-    Setting['plugin_redmine_better_gantt_chart']['schedule_on_weekends']
+  def self.work_on_weekends?
+    Setting['plugin_redmine_better_gantt_chart']['work_on_weekends']
   end
 end

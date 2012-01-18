@@ -1,6 +1,10 @@
 require File.expand_path('../../spec_helper', __FILE__)
 
 describe 'Improved issue dependencies management' do
+  before(:all) do
+    configure_plugin :work_on_weekends => true
+  end
+
   before(:each) do 
     @first_issue, @second_issue = create_related_issues("precedes")
   end
@@ -217,12 +221,12 @@ describe 'Improved issue dependencies management' do
     let(:issue) { Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1.week)}
 
     it "is in days if work on weekends enabled" do
-      RedmineBetterGanttChart.stub!(:schedule_on_weekends?).and_return(true)
+      RedmineBetterGanttChart.stub!(:work_on_weekends?).and_return(true)
       issue.duration.should == 7
     end
 
     it "is in working days if work on weekends disabled" do
-      RedmineBetterGanttChart.stub!(:schedule_on_weekends?).and_return(false)
+      RedmineBetterGanttChart.stub!(:work_on_weekends?).and_return(false)
       issue.duration.should == 5
     end
   end
