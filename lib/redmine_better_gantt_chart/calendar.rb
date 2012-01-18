@@ -24,7 +24,7 @@ module RedmineBetterGanttChart
       if RedmineBetterGanttChart.schedule_on_weekends?
         end_date
       else
-        end_date + weekends_between(date, end_date).days
+        next_working_day(end_date + weekends_between(date, end_date).days)
       end
     end
 
