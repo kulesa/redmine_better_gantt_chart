@@ -11,10 +11,7 @@ module Helpers
   end
 
   def configure_plugin(settings = {})
-    Setting['plugin_redmine_better_gantt_chart'] = {
-      'calculate_duration' => true,
-      'work_on_weekends' => true
-    }.merge(settings)
+    Setting['plugin_redmine_better_gantt_chart'] = { 'work_on_weekends' => true }.merge(settings)
   end
   
   # Useful for debugging - draws ASCII gantt chart

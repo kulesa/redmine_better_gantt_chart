@@ -15,40 +15,9 @@ describe IssuesController do
 
   let!(:issue) { Factory(:issue) }
 
-  context "when calculation of estimated duration is enabled" do
-    before  do
-      configure_plugin 'calculate_duration' => true
-    end
-
-    it "should show estimated duration in issue details" do
-      get :show, :id => issue.id
-      response.should have_text(/th class=.estimated_duration./)
-    end
-
-    it "should show estimated duration on issue form" do
-      get :edit, :id => issue.id
-      response.should have_text(/input id=.issue_estimated_duration./)
-    end
-  end
-
-  context "when calculation of estimated duration is disabled" do
-    before  do
-      configure_plugin 'calculate_duration' => false
-    end
-
-    describe "#show" do
-      it "should NOT show estimated duration in issue details" do
-        get :show, :id => issue.id
-        response.should_not have_text(/th class=.estimated_duration./)
-      end
-    end
-
-    describe "#edit" do
-      it "should NOT show estimated duration on issue form" do
-        get :edit, :id => issue.id
-        response.should_not have_text(/input id=.issue_estimated_duration./)
-      end
-    end
+  it "should show estimated duration in issue details" do
+    get :show, :id => issue.id
+    response.should have_text(/th class=.duration./)
   end
 end
 

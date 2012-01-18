@@ -1,5 +1,4 @@
 # English strings go here for Rails i18n
 en:
-  field_estimated_duration: "Estimated duration"
-  calculate_issue_duration_label: "Calculate issue duration"
-  schedule_on_weekends_label: "Schedule on weekends"
+  field_duration: "Duration"
+  work_on_weekends_label: "Work on weekends"

@@ -1,18 +1,9 @@
 <p>
-<label for="settings_calculate_duration"><%= h l(:calculate_issue_duration_label) %>:</label>
-<%= check_box_tag('settings[calculate_duration]', @settings['calculate_duration'], @settings['calculate_duration']) %>
-</p>
-<p>
-When enabled, issue attribute 'Estimated duration' is available for manual entry. If both start and finish dates are specified, 
-estimated duration is calculated based on the difference between the dates and 'Schedule on weekends' parameter. 
-If only one of the dates and estimated duration is provided, the other date is calculated automatically.
-</p>
-<p>
 <label for="settings_work_on_weekends"><%= h l(:work_on_weekends_label) %>:</label>
 <%= check_box_tag('settings[work_on_weekends]', @settings['work_on_weekends'], @settings['work_on_weekends']) %>
 </p>
 <p>
-If enabled, issues can start and finish on weekends. If disabled, rescheduling of related issues will
-move start or end date to Monday if the date falls to a weekend. Note, that in any case start and finish
-dates can be set to a weekend manually.
+<strong>Enabled</strong>: a week has 7 working days. Issues can start and finish on weekends when automatically rescheduled. Issue duration includes weekends.
+<br /><strong>Disabled</strong>: a week has 5 working days. If start or due date falls on a weekend when the issue is rescheduled automatically, it is moved to the next Monday.
+<br />Note, that with any value of the setting start and due dates can always be set to a weekend manually.
 </p>

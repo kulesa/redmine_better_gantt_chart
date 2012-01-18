@@ -1,6 +1,4 @@
-<% if RedmineBetterGanttChart.calculate_duration? %>
-  <tr>
-    <th class='estimated_duration'><%= h l(:field_estimated_duration)%>:</th>
-    <td class='estimated_duration'><%= issue.estimated_duration if issue.estimated_duration.present? %></td>
-  </tr>
-<% end %>
+<tr>
+  <th class='duration'><%= h l(:field_duration)%>:</th>
+  <td class='duration'><%= issue.duration if issue.duration > 0 %></td>
+</tr>

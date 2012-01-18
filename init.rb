@@ -39,7 +39,6 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
   requires_redmine :version_or_higher => '1.1.0'
 
   settings(:default => {
-    'calculate_duration'   => false,
     'work_on_weekends' => true
   }, :partial => "settings/better_gantt_chart_settings")
 end
@@ -47,4 +46,3 @@ end
 require 'redmine_better_gantt_chart/redmine_better_gantt_chart'
 require 'redmine_better_gantt_chart/calendar'
 require 'redmine_better_gantt_chart/hooks/view_issues_show_details_bottom_hook'
-require 'redmine_better_gantt_chart/hooks/view_issues_form_details_bottom_hook'
