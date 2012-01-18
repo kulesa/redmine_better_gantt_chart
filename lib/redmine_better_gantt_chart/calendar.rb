@@ -2,12 +2,12 @@ module RedmineBetterGanttChart
   module Calendar
     def self.workdays_between(date_from, date_to)
       date_from, date_to = date_to, date_from if date_to < date_from
-      (date_from..date_to).select { |d| is_a_working_day?(d) }.size
+      number_of_days_in(date_from, date_to) { |d| is_a_working_day?(d) }
     end
 
     def self.weekends_between(date_from, date_to)
       date_from, date_to = date_to, date_from if date_to < date_from
-      (date_from..date_to).select { |d| !is_a_working_day?(d) }.size
+      number_of_days_in(date_from, date_to) { |d| !is_a_working_day?(d) }
     end
 
     def self.next_working_day(date)
@@ -45,6 +45,12 @@ module RedmineBetterGanttChart
 
     def self.is_a_working_day?(date)
       working_days.include?(date.wday)
+    end
+
+    def self.number_of_days_in(date_from, date_to, &block)
+      (date_from..(date_to -1.day)).select do |date|
+        yield date
+      end.size
     end
   end
 end
