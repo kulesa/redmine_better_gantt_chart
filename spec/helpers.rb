@@ -10,8 +10,8 @@ module Helpers
    from_issue.save!
   end
 
-  def configure_plugin(settings = {})
-    Setting['plugin_redmine_better_gantt_chart'] = { 'work_on_weekends' => true }.merge(settings)
+  def work_on_weekends(wow)
+    RedmineBetterGanttChart.stub(:work_on_weekends?).and_return(wow)
   end
   
   # Useful for debugging - draws ASCII gantt chart
