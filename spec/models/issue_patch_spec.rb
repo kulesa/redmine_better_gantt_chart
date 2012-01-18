@@ -12,7 +12,7 @@ describe 'Improved issue dependencies management' do
 
     it "issue duration is in calendar days" do
       issue = Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1.week)
-      issue.duration.should == 7
+      issue.duration.should == 8
     end
 
     it 'changes date of the dependent task when due date of the first task is moved forward' do
@@ -231,7 +231,7 @@ describe 'Improved issue dependencies management' do
 
     it "issue duration is in working days" do
       issue = Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1.week)
-      issue.duration.should == 5
+      issue.duration.should == 6
     end
   end
 end

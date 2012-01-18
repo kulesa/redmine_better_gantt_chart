@@ -48,7 +48,7 @@ module RedmineBetterGanttChart
     end
 
     def self.number_of_days_in(date_from, date_to, &block)
-      (date_from..(date_to -1.day)).select do |date|
+      (date_from..date_to).select do |date|
         yield date
       end.size
     end
