@@ -85,6 +85,7 @@ module RedmineBetterGanttChart
         issue.relations_from.each do |relation|
           if is_a_link_with_following_issue?(relation) && due_date = cached_value(issue, :due_date)
             new_start_date = RedmineBetterGanttChart::Calendar.workdays_from_date(due_date, relation.delay) + 1.day
+            new_start_date = RedmineBetterGanttChart::Calendar.next_working_day(new_start_date)
             reschedule_dependent_issue(relation.issue_to, :start_date => new_start_date)
           end
         end
