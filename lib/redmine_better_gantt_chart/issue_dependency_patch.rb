@@ -107,6 +107,8 @@ module RedmineBetterGanttChart
               cache_change(child, :start_date => parent_min_start, :parent => true)
             end
           end
+
+          process_following_issues(Issue.find(parent_id))
         end
       end
       

@@ -221,6 +221,21 @@ describe 'Improved issue dependencies management' do
         parent_b.start_date.should == parent_start - 2.days
         parent_b.due_date.should   == parent_due - 2.days
       end
+
+      it "should reshedule a following task of a parent task, when the parent task itself being rescheduled after changes in it's child task" do
+        parent = Factory(:issue)
+        child  = Factory(:issue, :start_date => Date.today, 
+                                 :due_date   => Date.today + 1,
+                                 :parent_issue_id => parent.id)
+        follower = Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1)
+        relate_issues parent, follower
+
+        child.update_attributes(:due_date => Date.today + 7)
+        parent.reload
+        follower.reload
+
+        follower.start_date.should == parent.due_date + 1
+      end
     end
   end
 
