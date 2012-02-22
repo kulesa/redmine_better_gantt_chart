@@ -8,7 +8,8 @@ The plugin imroves functionality of Redmine Gantt Chart.
 
 - Issues on Gantt chart connected with arrows. Handy!
 - Relations info added to issue tooltip.
-- **NEW**: rescheduling takes into account weekends, if this setting is enabled
+- *NEW*: smart sorting of issues on the chart. Now issues are sorted just like you'd expect them to.
+- *NEW*: rescheduling takes into account weekends, if this setting is enabled
 - Fixed rescheduling of related tasks if due date of dependent task changed to an earlier date.
 - Fixed sorting of issues on the chart  as per http://www.redmine.org/issues/7335
 - Added validation: start date of child issue cannot be less than start date of the parent, if parent depends on other tasks
@@ -37,12 +38,16 @@ Connection arrows are rendered in SVG via {Raphael.js}[http://raphaeljs.com/] li
 3. Save changes.
 4. Go to *Gantt* tab. 
 
+=== Smart sorting
+
+By default issues on the chart sorted  uses improved  algorythm. However you can switch back to default Redmine sorting by disabling 'Smart sorting' plugin setting.
+
 === Rescheduling
 
 Changing due date of an issue causes rescheduling of related issues. By default, any day of week is a working day, and new start and dure dates can fall on weekends as well as on other days. To change this,
-go to plugin settings and disable **Work on weekends** checkbox. This will turn on support of working days. So far only normal weekends supported; you need manually change dates falling on holidays.
+go to plugin settings and disable *Work on weekends* checkbox. This will turn on support of working days. So far only normal weekends supported; you need manually change dates falling on holidays.
 
-New setting **Work on weekends** introduced in v.0.6.
+New setting *Work on weekends* introduced in v.0.6.
 
 == Problems and Limitations
 
