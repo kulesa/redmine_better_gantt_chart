@@ -39,7 +39,8 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
   requires_redmine :version_or_higher => '1.1.0'
 
   settings(:default => {
-    'work_on_weekends' => true
+    'work_on_weekends' => true,
+    'smart_sorting' => true
   }, :partial => "settings/better_gantt_chart_settings")
 end
 

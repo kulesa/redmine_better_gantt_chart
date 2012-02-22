@@ -7,3 +7,8 @@
 <br /><strong>Disabled</strong>: a week has 5 working days. If start or due date falls on a weekend when the issue is rescheduled automatically, it is moved to the next Monday.
 <br />Note, that with any value of the setting start and due dates can always be set to a weekend manually.
 </p>
+<p>
+<br />
+<label for="settings_smart_sorting"><%= h l(:smart_sorting_label) %>:</label>
+<%= check_box_tag('settings[smart_sorting]', @settings['smart_sorting'], @settings['smart_sorting']) %>
+</p>

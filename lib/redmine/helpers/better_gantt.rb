@@ -694,11 +694,17 @@ module Redmine
       end
 
       def get_compare_params(issue)
-        start_date = issue.start_date or Date.new()
-        identifying_id = issue.leaf? ? issue.parent_id : issue.id
-        identifying_start = issue.leaf? && issue.parent.present? ? issue.parent.start_date : start_date
+        if RedmineBetterGanttChart.smart_sorting?
+          # Smart sorting: issues sorted first by start date of their parent issue, then by id of parent issue, then by start date
+          start_date = issue.start_date or Date.new()
+          identifying_id = issue.leaf? ? issue.parent_id : issue.id
+          identifying_start = issue.leaf? && issue.parent.present? ? issue.parent.start_date : start_date
 
-        [issue.root_id, identifying_start, identifying_id, start_date, issue.lft] 
+          [issue.root_id, identifying_start, identifying_id, start_date, issue.lft] 
+        else
+          # Default Redmine sorting
+          [issue.root_id, issue.lft]
+        end
       end
 
       def current_limit
