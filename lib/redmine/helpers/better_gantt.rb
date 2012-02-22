@@ -690,12 +690,15 @@ module Redmine
       end
 
       def gantt_issue_compare(x, y, issues = nil)
-        if x.root_id == y.root_id
-          x.lft <=> y.lft
-        else
-          x.root_id <=> y.root_id
-        end
-        #[(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]
+        get_compare_params(x) <=> get_compare_params(y)
+      end
+
+      def get_compare_params(issue)
+        start_date = issue.start_date or Date.new()
+        identifying_id = issue.leaf? ? issue.parent_id : issue.id
+        identifying_start = issue.leaf? ? issue.parent.start_date : start_date
+
+        [issue.root_id, identifying_start, identifying_id, start_date, issue.lft] 
       end
 
       def current_limit
