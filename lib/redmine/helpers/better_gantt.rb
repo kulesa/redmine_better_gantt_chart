@@ -696,6 +696,9 @@ module Redmine
       def get_compare_params(issue)
         if RedmineBetterGanttChart.smart_sorting?
           # Smart sorting: issues sorted first by start date of their parent issue, then by id of parent issue, then by start date
+
+          root_id = issue.id == issue.root_id ? 0 : issue.root_id
+
           start_date = issue.start_date or Date.new()
 
           if issue.leaf? && issue.parent.present?
@@ -706,7 +709,7 @@ module Redmine
             identifying_start = start_date
           end
 
-          [issue.root_id, identifying_start, identifying_id, start_date, issue.lft] 
+          [root_id, identifying_start, identifying_id, start_date, issue.lft]
         else
           # Default Redmine sorting
           [issue.root_id, issue.lft]
