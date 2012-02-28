@@ -699,7 +699,7 @@ module Redmine
 
           root_id = issue.id == issue.root_id ? 0 : issue.root_id
 
-          start_date = issue.start_date or Date.new()
+          start_date = issue.start_date || Date.new()
 
           if issue.leaf? && issue.parent.present?
             identifying_id = issue.parent_id || issue.id
