@@ -2,7 +2,7 @@
 
 {<img src="http://travis-ci.org/kulesa/redmine_better_gantt_chart.png" />}[http://travis-ci.org/kulesa/redmine_better_gantt_chart]
 
-The plugin imroves functionality of Redmine Gantt Chart.
+The plugin improves functionality of Redmine Gantt Chart.
 
 == Features
 
