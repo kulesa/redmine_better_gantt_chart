@@ -259,5 +259,19 @@ describe 'Improved issue dependencies management' do
       }.should change(@second_issue, :due_date).to(monday + 3)
 
     end
+
+    it "lets create a relation between issues without due dates" do
+      pop = Factory(:issue)
+      parent_issue = Factory(:issue, :start_date => Date.today, :due_date => nil)
+      issue1 = Factory(:issue, :start_date => Date.today, :due_date => nil)
+      issue1.update_attributes!(:parent_issue_id => parent_issue.id)
+      issue2 = Factory(:issue, :start_date => Date.today, :due_date => nil)
+      issue2.update_attributes!(:parent_issue_id => parent_issue.id)
+      relate_issues(issue2, issue1, "follows")
+
+      issue1.reload
+      issue1.relations.count.should == 1
+    end
+
   end
 end

@@ -37,10 +37,6 @@ describe RedmineBetterGanttChart::Calendar do
     subject.workdays_between(friday, friday).should == 1
   end
 
-  it "should have 2 working day between today and tomorrow" do
-    subject.workdays_between(thursday, friday).should == 2
-  end
-
   it "should have 6 working days between saturday and next_monday if work on weekends disabled" do
     work_on_weekends false
     subject.workdays_between(saturday, saturday + 9).should == 6
@@ -110,5 +106,10 @@ describe RedmineBetterGanttChart::Calendar do
     sunday = saturday + 1.day
     next_monday = sunday + 8.days
     subject.workdays_from_date(sunday, 6).should == next_monday
+  end
+
+  it "should return the same day if duration is 0" do
+    work_on_weekends false
+    subject.workdays_from_date(friday, 0).should == friday
   end
 end

@@ -191,8 +191,8 @@ module RedmineBetterGanttChart
       # Returns the time scheduled for this issue in working days.
       #
       def duration_with_work_days
-        if start_date && due_date
-          RedmineBetterGanttChart::Calendar.workdays_between(start_date, due_date)
+        if self.start_date && self.due_date
+          RedmineBetterGanttChart::Calendar.workdays_between(self.start_date, self.due_date)
         else
           0
         end
@@ -201,11 +201,11 @@ module RedmineBetterGanttChart
       # Changes behaviour of reschedule_after method
       def reschedule_after_with_earlier_date(date)      
         return if date.nil?
-        if start_date.nil? || start_date != date
-          if leaf?
-            self.start_date, self.due_date = date, RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration - 1)
-          else
-            self.start_date = date
+
+        if start_date.blank? || start_date != date
+          self.start_date = date
+          if due_date.present?
+            self.due_date = RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration - 1)
           end
           save
         end
