@@ -374,22 +374,22 @@ module Redmine
       end
 
       def line_for_issue(issue, options)
-        # Skip issues that don't have a due_before (due_date or version's due_date)
-        if issue.is_a?(Issue) && issue.due_before
+        return unless issue.is_a?(Issue)
+        if issue.due_before
           coords = coordinates(issue.start_date, issue.due_before, issue.done_ratio, options[:zoom])
           label = "#{ issue.status.name } #{ issue.done_ratio }%"
-
-          case options[:format]
-          when :html
-            html_task(options, coords, :css => "task " + (issue.leaf? ? 'leaf' : 'parent'), :label => label, :issue => issue, :markers => !issue.leaf?)
-          when :image
-            image_task(options, coords, :label => label)
-          when :pdf
-            pdf_task(options, coords, :label => label)
-        end
         else
-          ActiveRecord::Base.logger.debug "GanttHelper#line_for_issue was not given an issue with a due_before"
-          ''
+          coords = coordinates(issue.start_date, issue.start_date, 0, options[:zoom])
+          label = "#{ issue.status.name }%"
+        end
+
+        case options[:format]
+        when :html
+          html_task(options, coords, :css => "task " + (issue.leaf? ? 'leaf' : 'parent'), :label => label, :issue => issue, :markers => !issue.leaf?)
+        when :image
+          image_task(options, coords, :label => label)
+        when :pdf
+          pdf_task(options, coords, :label => label)
         end
       end
 
@@ -798,6 +798,7 @@ module Redmine
             output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_progress_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_done'>&nbsp;</div>"
           end
         end
+
         # Renders the markers
         if options[:markers]
           if coords[:start]
