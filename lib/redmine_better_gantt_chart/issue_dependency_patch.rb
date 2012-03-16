@@ -13,6 +13,10 @@ module RedmineBetterGanttChart
   
     module InstanceMethods
 
+      def create_journal_entry
+        create_journal
+      end
+
       # Redefined to work without recursion on AR objects
       def reschedule_following_issues_with_fast_update
         if start_date_changed? || due_date_changed?
@@ -54,7 +58,11 @@ module RedmineBetterGanttChart
         changes.each_pair do |key, value|
           changes.delete(key) if issue.send(key) == value.to_date
         end
-        issue.update_attributes(changes) unless changes.empty?
+        unless changes.empty?
+          issue.init_journal(User.current, I18n.t('task_moved_journal_entry'))
+          issue.update_attributes(changes)
+          issue.create_journal_entry
+        end
       end
 
       def reschedule_dependent_issue(issue = self, options = {}) #start_date_to = nil, due_date_to = nil
