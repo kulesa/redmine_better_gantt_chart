@@ -3,9 +3,8 @@
 <%= check_box_tag('settings[work_on_weekends]', @settings['work_on_weekends'], @settings['work_on_weekends']) %>
 </p>
 <p>
-<strong>Enabled</strong>: a week has 7 working days. Issues can start and finish on weekends when automatically rescheduled. Issue duration includes weekends.
-<br /><strong>Disabled</strong>: a week has 5 working days. If start or due date falls on a weekend when the issue is rescheduled automatically, it is moved to the next Monday.
-<br />Note, that with any value of the setting start and due dates can always be set to a weekend manually.
+<strong><%= h l(:label_enabled) %></strong>: <%= h l(:description_enabled) %>
+<br /><strong><%= h l(:label_disabled) %></strong>: <%= h l(:description_disabled) %>
 </p>
 <p>
 <br />
