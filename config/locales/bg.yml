@@ -1,0 +1,6 @@
+# Bulgarian strings go here for Rails i18n, translated by Ivan Cenov, i_cenov@botevgrad.com
+bg: 
+  field_duration: "Продължителност"
+  work_on_weekends_label: "Работа в почивните дни"
+  smart_sorting_label: "Интелигентно сортиране"
+  task_moved_journal_entry: "поради промени в свързана задача"
