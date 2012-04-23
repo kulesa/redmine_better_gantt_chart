@@ -697,19 +697,20 @@ module Redmine
         if RedmineBetterGanttChart.smart_sorting?
           # Smart sorting: issues sorted first by start date of their parent issue, then by id of parent issue, then by start date
 
-          root_id = issue.id == issue.root_id ? 0 : issue.root_id
-
           start_date = issue.start_date || Date.new()
 
           if issue.leaf? && issue.parent.present?
             identifying_id = issue.parent_id || issue.id
             identifying_start = issue.parent.start_date || start_date
+            root_start = issue.root.start_date || start_date
           else
             identifying_id = issue.id
             identifying_start = start_date
+            root_start = start_date
           end
 
-          [root_id, identifying_start, identifying_id, start_date, issue.lft]
+          puts "#{issue.id}: #{issue.root_id}, #{identifying_start}, #{start_date}, #{issue.lft}"
+          [root_start, issue.root_id, identifying_start, start_date, issue.lft]
         else
           # Default Redmine sorting
           [issue.root_id, issue.lft]
