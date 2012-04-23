@@ -17,7 +17,7 @@ The plugin improves functionality of Redmine Gantt Chart.
 
 == Compatibility
 
-Tested with Redmine versions: 1.1.0, 1.1.1, 1.1.2, 1.1.3, 1.2.0.stable, 1.3.0.stable
+Tested with Redmine versions: 1.1.0, 1.1.1, 1.1.2, 1.1.3, 1.2, 1.3, 1.4
 
 == Installation and Setup
 
