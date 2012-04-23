@@ -24,5 +24,5 @@ group :test do
   gem 'mocha'
   gem 'redmine_plugin_support'
   gem 'test-unit', '1.2.3'
-  gem 'RedCloth', ">= 4.2.7"
+  gem 'RedCloth', "~> 4.2.9"
 end
