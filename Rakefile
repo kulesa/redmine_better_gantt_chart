@@ -1,10 +1,25 @@
-require 'redmine_plugin_support'
 
 Dir[File.expand_path(File.dirname(__FILE__)) + "/lib/tasks/**/*.rake"].sort.each { |ext| load ext }
 
-RedminePluginSupport::Base.setup do |plugin|
-  plugin.project_name = 'redmine_better_gantt_chart'
-  plugin.default_task = [:spec, :features]
-  plugin.tasks = [:doc, :release, :clean, :test, :db, :spec]
-  plugin.redmine_root = ENV['REDMINE_ROOT'] || File.expand_path(File.dirname(__FILE__) + '/../../..')
+begin
+    require 'spec'
+rescue LoadError
+    require 'rubygems'
+    require 'spec'
+end
+
+begin
+    require 'spec/rake/spectask'
+rescue LoadError
+    puts <<-EOS
+    To use rspec for testing you must install rspec gem:
+      gem install rspec
+    EOS
+    exit(0)
+end
+
+desc "Run the specs under spec/models"
+Spec::Rake::SpecTask.new do |t|
+    t.spec_opts = ['--options', "spec/spec.opts"]
+      t.spec_files = FileList['spec/**/*_spec.rb']
 end
