@@ -709,7 +709,6 @@ module Redmine
             root_start = start_date
           end
 
-          puts "#{issue.id}: #{issue.root_id}, #{identifying_start}, #{start_date}, #{issue.lft}"
           [root_start, issue.root_id, identifying_start, start_date, issue.lft]
         else
           # Default Redmine sorting
