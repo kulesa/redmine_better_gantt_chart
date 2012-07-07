@@ -745,7 +745,7 @@ module Redmine
         style << "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
         style << "font-style:italic;" if options[:external]
 
-        output = view.content_tag 'div', subject, :class => options[:css], :style => style, :title => options[:title]
+        output = view.content_tag 'div', subject.html_safe, :class => options[:css], :style => style, :title => options[:title]
         @subjects << output
         output
       end
