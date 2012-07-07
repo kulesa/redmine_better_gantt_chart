@@ -1,6 +1,6 @@
 module RedmineBetterGanttChart
   module ActiveRecord
-    module CallbackExtensions
+    module CallbackExtensionsForRails2
 
       def self.included(base) #:nodoc:
         base.extend ClassMethods
