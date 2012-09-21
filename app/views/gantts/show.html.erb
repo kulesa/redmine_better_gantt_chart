@@ -172,8 +172,13 @@ if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
 
 <table width="100%">
 <tr>
-<td align="left"><%= link_to('&#171; ' + l(:label_previous), params.merge(@gantt.params_previous)) %></td>
-<td align="right"><%= link_to(l(:label_next) + ' &#187;', params.merge(@gantt.params_next)) %></td>
+<%
+  prev_arrow='&#171; ' + l(:label_previous)
+  next_arrow=l(:label_next) + ' &#187;'
+%>
+
+<td align="left"><%= link_to(prev_arrow.html_safe, params.merge(@gantt.params_previous)) %></td>
+<td align="right"><%= link_to(next_arrow.html_safe, params.merge(@gantt.params_next)) %></td>
 </tr>
 </table>
 
