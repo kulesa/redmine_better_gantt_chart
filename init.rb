@@ -11,7 +11,7 @@ if Rails::VERSION::MAJOR >= 3
   end
 else
   Dispatcher.to_prepare :redmine_better_gantt_chart do
-    unless ActiveRecord::Base.included_modules.include?(RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails3)
+    unless ActiveRecord::Base.included_modules.include?(RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails2)
       ActiveRecord::Base.send(:include, RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails2)
     end
     require_dependency 'redmine_better_gantt_chart/patches'
