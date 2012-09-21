@@ -42,18 +42,13 @@ module RedmineBetterGanttChart
         end
 
         unless issue.relations_to.empty?
-          content += ("<br />" + issue.relations_to.first(display_limit)
-                                      .map(&relation_from_link)
-                                      .join('<br />')).html_safe 
-
-          display_limit -= issue.relations_to.count 
+          content += ("<br />" + issue.relations_to.first(display_limit).map(&relation_from_link).join('<br />')).html_safe
+          display_limit -= issue.relations_to.count
         end
 
         unless issue.relations_from.empty?
           new_limit = display_limit < 0 ? 0 : display_limit
-          content += ("<br />" + issue.relations_from.first(new_limit)
-                                      .map(&relation_to_link)
-                                      .join('<br />')).html_safe 
+          content += ("<br />" + issue.relations_from.first(new_limit).map(&relation_to_link).join('<br />')).html_safe
           display_limit -= issue.relations_from.count
         end
 
