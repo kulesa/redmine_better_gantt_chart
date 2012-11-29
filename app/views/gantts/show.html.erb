@@ -46,13 +46,18 @@ header_heigth = 18
 headers_height = header_heigth
 show_weeks = false
 show_days = false
+show_day_numbers = false
 
-if @gantt.zoom >1
+if @gantt.zoom > 1
     show_weeks = true
     headers_height = 2*header_heigth
     if @gantt.zoom > 2
-        show_days = true
-        headers_height = 3*header_heigth
+      show_days = true
+      headers_height = (2.75 * header_heigth).to_i
+      if @gantt.zoom > 3
+        show_day_numbers = true
+        headers_height = (3.25 * header_heigth).to_i
+      end
     end
 end
 
@@ -152,6 +157,7 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
     style += "left: #{left}px;"
     style += "width: #{width}px;"
     style += "height: #{height}px;"
+    style += "font-size: 70%;" if @gantt.zoom == 1
   %>
   <%= content_tag(:div, :style => style, :class => "gantt_hdr") do %>
     <%= link_to h("#{month_f.year}-#{month_f.month}"),
@@ -221,8 +227,8 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
 	height = g_height + header_heigth - 1
 	wday = @gantt.date_from.cwday
   %>
-  <% (@gantt.date_to - @gantt.date_from + 1).to_i.times do %>
-    <% if wday <= work_days_in_week %>
+  <% (@gantt.date_from).upto(@gantt.date_to) do |day| %>
+    <% if (day.cwday <= work_days_in_week) %>
       <%
         width =  zoom - 1
         day_abbr = [:"zh", :"zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
@@ -231,18 +237,26 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
         style += "top:37px;"
         style += "width: #{width}px;"
         style += "height: #{height}px;"
+        style += "text-align:center;"
         style += "font-size:0.7em;"
         style += 'background:#f1f1f1;' if (@gantt.work_on_weekends && wday > 5)
         style += 'border-left: 1px solid #c6c6c6;' if (!@gantt.work_on_weekends && wday == 1)
       %>
       <%= content_tag(:div, :style => style, :class => "gantt_hdr") do %>
         <%= day_letter(wday) %>
+        <% if show_day_numbers %>
+          <br />
+          <%= (day).mday %>
+        <% end %>
       <% end %>
     <% end %>
-	<% 
-    left = left + width+1
-    wday = wday + 1
-    wday = 1 if wday > work_days_in_week
+	<%
+    if day.cwday <= work_days_in_week
+      left = left + width+1
+      wday = wday + 1
+    else
+      wday = 1
+    end
     %>
   <% end %>
 <% end %>
