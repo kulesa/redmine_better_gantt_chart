@@ -34,7 +34,8 @@ module Redmine
         end
       end
 
-      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :truncated, :max_rows
+      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, 
+                  :truncated, :max_rows, :work_on_weekends
       attr_accessor :query
       attr_accessor :project
       attr_accessor :view
@@ -58,6 +59,8 @@ module Redmine
         @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
         months = (options[:months] || User.current.pref[:gantt_months]).to_i
         @months = (months > 0 && months < 25) ? months : 6
+        @work_on_weekends = RedmineBetterGanttChart.work_on_weekends?
+        work_on_weekends = @work_on_weekends
 
         # Save gantt parameters as user preference (zoom and months count)
         if (User.current.logged? && (@zoom != User.current.pref[:gantt_zoom] || @months != User.current.pref[:gantt_months]))
@@ -87,15 +90,23 @@ module Redmine
       end
 
       def params
-        common_params.merge({  :zoom => zoom, :year => year_from, :month => month_from, :months => months })
+        common_params.merge({  :zoom => zoom, :year => year_from, 
+                               :month => month_from, :months => months,
+                               :work_on_weekends => work_on_weekends })
       end
 
       def params_previous
-        common_params.merge({:year => (date_from << months).year, :month => (date_from << months).month, :zoom => zoom, :months => months })
+        common_params.merge({:year => (date_from << months).year, 
+                             :month => (date_from << months).month, 
+                             :zoom => zoom, :months => months, 
+                             :work_on_weekends => work_on_weekends })
       end
 
       def params_next
-        common_params.merge({:year => (date_from >> months).year, :month => (date_from >> months).month, :zoom => zoom, :months => months })
+        common_params.merge({:year => (date_from >> months).year, 
+                             :month => (date_from >> months).month, 
+                             :zoom => zoom, :months => months, 
+                             :work_on_weekends => work_on_weekends })
       end
 
       # Returns the number of rows that will be rendered on the Gantt chart
@@ -277,7 +288,7 @@ module Redmine
         # Skip versions that don't have a start_date or due date
         if project.is_a?(Project) && project.start_date && project.due_date
           options[:zoom] ||= 1
-          options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
+          options[:g_width] ||= (work_days_in(self.date_to, self.date_from) + 1) * options[:zoom]
 
           coords = coordinates(project.start_date, project.due_date, nil, options[:zoom])
           label = h(project)
@@ -315,7 +326,7 @@ module Redmine
         # Skip versions that don't have a start_date
         if version.is_a?(Version) && version.start_date && version.due_date
           options[:zoom] ||= 1
-          options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
+          options[:g_width] ||= (work_days_in(self.date_to, self.date_from) + 1) * options[:zoom]
 
           coords = coordinates(version.start_date, version.due_date, version.completed_pourcent, options[:zoom])
           label = "#{h version } #{h version.completed_pourcent.to_i.to_s}%"
@@ -404,7 +415,7 @@ module Redmine
         header_height = 18
         # width of one day in pixels
         zoom = @zoom*2
-        g_width = (@date_to - @date_from + 1)*zoom
+        g_width = (work_days_in(@date_to, @date_from) + 1)*zoom
         g_height = 20 * number_of_rows + 30
         headers_height = (show_weeks ? 2*header_height : header_height)
         height = g_height + headers_height
@@ -509,6 +520,9 @@ module Redmine
         imgl.to_blob
       end if Object.const_defined?(:Magick)
 
+def cache?
+  false
+end
       def to_pdf
         
         begin
@@ -634,6 +648,27 @@ module Redmine
         pdf.Output
       end
 
+      # Get the number of work days between two dates (include the days at both ends).
+      # This assumes that the work week is Monday-Friday.
+      # TODO: It's probably a bit odd to have date_to as the first parameter here.
+      #       I just kept the same order as the original date subtraction code.
+      def work_days_in(date_to, date_from)
+        if @work_on_weekends
+          # move the endpoints to the next Monday if they fall on a weekend
+          date_to += 8 - date_to.cwday if date_to.cwday >= 6
+          date_from += 8 - date_from.cwday if date_from.cwday >= 6
+        end
+        days_in = date_to - date_from
+        if @work_on_weekends
+          return days_in
+        end
+        weekends_in = (days_in / 7).floor
+        weekends_in += 1 if date_to.cwday < date_from.cwday
+        work_days = days_in - (weekends_in * 2)
+        #puts "Days in range %s to %s: %d" % [date_from, date_to, work_days]
+        work_days
+      end
+
       private
 
       def coordinates(start_date, end_date, progress, zoom=nil)
@@ -642,25 +677,25 @@ module Redmine
         coords = {}
         if start_date && end_date && start_date < self.date_to && end_date > self.date_from
           if start_date > self.date_from
-            coords[:start] = start_date - self.date_from
-            coords[:bar_start] = start_date - self.date_from
+            coords[:start] = work_days_in(start_date, self.date_from)
+            coords[:bar_start] = work_days_in(start_date, self.date_from)
           else
             coords[:bar_start] = 0
           end
           if end_date < self.date_to
-            coords[:end] = end_date - self.date_from
-            coords[:bar_end] = end_date - self.date_from + 1
+            coords[:end] = work_days_in(end_date, self.date_from)
+            coords[:bar_end] = work_days_in(end_date, self.date_from) + 1
           else
-            coords[:bar_end] = self.date_to - self.date_from + 1
+            coords[:bar_end] = work_days_in(self.date_to, self.date_from) + 1
           end
 
           if progress
             progress_date = start_date + (end_date - start_date + 1) * (progress / 100.0)
             if progress_date > self.date_from && progress_date > start_date
               if progress_date < self.date_to
-                coords[:bar_progress_end] = progress_date - self.date_from
+                coords[:bar_progress_end] = work_days_in(progress_date, self.date_from)
               else
-                coords[:bar_progress_end] = self.date_to - self.date_from + 1
+                coords[:bar_progress_end] = work_days_in(self.date_to, self.date_from) + 1
               end
             end
 
@@ -668,9 +703,9 @@ module Redmine
               late_date = [Date.today, end_date].min
               if late_date > self.date_from && late_date > start_date
                 if late_date < self.date_to
-                  coords[:bar_late_end] = late_date - self.date_from + 1
+                  coords[:bar_late_end] = work_days_in(late_date, self.date_from) + 1
                 else
-                  coords[:bar_late_end] = self.date_to - self.date_from + 1
+                  coords[:bar_late_end] = work_days_in(self.date_to, self.date_from) + 1
                 end
               end
             end

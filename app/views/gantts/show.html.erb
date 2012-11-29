@@ -57,7 +57,7 @@ if @gantt.zoom >1
 end
 
 # Width of the entire chart    
-  g_width = ((@gantt.date_to - @gantt.date_from + 1) * zoom).to_i
+  g_width = ((@gantt.work_days_in(@gantt.date_to, @gantt.date_from) + 1) * zoom).to_i
   @gantt.render(:top => headers_height + 8,
                 :zoom => zoom,
                 :g_width => g_width,
@@ -115,6 +115,23 @@ t_height = g_height + headers_height
 %>
 <%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => "gantt_hdr") %>
 
+<% ###### Today red line (excluded from cache) ###### %>
+<% if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
+<%
+    width =  zoom
+    today_left = (((@gantt.work_days_in(Date.today, @gantt.date_from) + 0) * zoom).floor() - 1).to_i
+    style  = ""
+    style += "position: absolute;"
+    style += "height: #{headers_height + g_height}px;"
+    style += "top: 0px;"
+    style += "left: #{today_left}px;"
+    style += "width: #{width}px;"
+    #style += "border-left: 1px dashed red;"
+    style += 'background:#ffe3e3;'
+  %>
+  <%= content_tag(:div, '&nbsp;'.html_safe, :style => style) %>
+<% end %>
+
 <% ###### Months headers ###### %>
 <%
 month_f = @gantt.date_from
@@ -123,7 +140,14 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
 	%>
 <% @gantt.months.times do %>
   <%
-    width = (((month_f >> 1) - month_f) * zoom - 1).to_i
+    # if the last day of the month is on a weekend, move it to the Friday before
+    #next_month = month_f >> 1
+    #puts 'Next month: %s' % [next_month]
+    #next_month -= 1 if (next_month - 1).cwday >= 7
+    #next_month -= 1 if (next_month - 1).cwday >= 6
+    #puts 'Next month: %s' % [next_month]
+    #puts
+    width = (@gantt.work_days_in(month_f >> 1, month_f) * zoom - 1).to_i
     style  = ""
     style += "left: #{left}px;"
     style += "width: #{width}px;"
@@ -143,6 +167,7 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
 <% ###### Weeks headers ###### %>
 <% if show_weeks %>
 <% 
+	work_days_in_week = @gantt.work_on_weekends ? 7 : 5
 	left = 0
 	height = (show_days ? header_heigth-1 : header_heigth-1 + g_height)
   %>
@@ -155,7 +180,7 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
     <%
 	    # find next monday after @date_from
 		week_f = @gantt.date_from + (7 - @gantt.date_from.cwday + 1)
-		width = (7 - @gantt.date_from.cwday + 1) * zoom-1
+		width = (work_days_in_week - @gantt.date_from.cwday + 1) * zoom-1
       style  = ""
       style += "left: #{left}px;"
       style += "top: 19px;"
@@ -168,8 +193,8 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
   <% end %>
   <% while week_f <= @gantt.date_to %>
 	<%
-      width = ((week_f + 6 <= @gantt.date_to) ?
-                  7 * zoom - 1 :
+      width = ((week_f + work_days_in_week - 1 <= @gantt.date_to) ?
+                  work_days_in_week * zoom - 1 :
                   (@gantt.date_to - week_f + 1) * zoom - 1).to_i
       style  = ""
       style += "left: #{left}px;"
@@ -197,44 +222,32 @@ height = (show_weeks ? header_heigth : header_heigth + g_height)
 	wday = @gantt.date_from.cwday
   %>
   <% (@gantt.date_to - @gantt.date_from + 1).to_i.times do %>
-    <%
-	  width =  zoom - 1
-      day_abbr = [:"zh", :"zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
-      style  = ""
-      style += "left: #{left}px;"
-      style += "top:37px;"
-      style += "width: #{width}px;"
-      style += "height: #{height}px;"
-      style += "font-size:0.7em;"
-      style += 'background:#f1f1f1;' if wday > 5
-	%>
-    <%= content_tag(:div, :style => style, :class => "gantt_hdr") do %>
-      <%= day_letter(wday) %>
+    <% if wday <= work_days_in_week %>
+      <%
+        width =  zoom - 1
+        day_abbr = [:"zh", :"zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
+        style  = ""
+        style += "left: #{left}px;"
+        style += "top:37px;"
+        style += "width: #{width}px;"
+        style += "height: #{height}px;"
+        style += "font-size:0.7em;"
+        style += 'background:#f1f1f1;' if (@gantt.work_on_weekends && wday > 5)
+        style += 'border-left: 1px solid #c6c6c6;' if (!@gantt.work_on_weekends && wday == 1)
+      %>
+      <%= content_tag(:div, :style => style, :class => "gantt_hdr") do %>
+        <%= day_letter(wday) %>
+      <% end %>
     <% end %>
 	<% 
-	left = left + width+1
-	wday = wday + 1
-	wday = 1 if wday > 7
+    left = left + width+1
+    wday = wday + 1
+    wday = 1 if wday > work_days_in_week
     %>
   <% end %>
 <% end %>
 
 <%= @gantt.lines.html_safe %>
-
-<% ###### Today red line (excluded from cache) ###### %>
-<% if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
-<%
-    today_left = (((Date.today - @gantt.date_from + 1) * zoom).floor() - 1).to_i
-    style  = ""
-    style += "position: absolute;"
-    style += "height: #{g_height}px;"
-    style += "top: #{headers_height + 1}px;"
-    style += "left: #{today_left}px;"
-    style += "width:10px;"
-    style += "border-left: 1px dashed red;"
-  %>
-  <%= content_tag(:div, '&nbsp;'.html_safe, :style => style) %>
-<% end %>
 
 </div>
 </td>
