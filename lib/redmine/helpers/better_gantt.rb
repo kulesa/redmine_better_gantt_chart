@@ -803,8 +803,8 @@ module Redmine
       end
 
       def html_task(params, coords, options={})
-		top = (params[:top] + 6).to_s
-	    text_top = (params[:top] + 3).to_s
+		top = (params[:top] + 4).to_s
+	    text_top = (params[:top] + 1).to_s
         output = ''
         # Renders the task bar, with progress and late
         
