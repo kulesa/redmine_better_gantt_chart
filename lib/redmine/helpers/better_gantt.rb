@@ -663,7 +663,6 @@ module Redmine
         weekends_in = (days_in / 7).floor
         weekends_in += 1 if date_to.cwday < date_from.cwday
         work_days = days_in - (weekends_in * 2)
-        #puts "Days in range %s to %s: %d" % [date_from, date_to, work_days]
         work_days
       end
 
@@ -821,7 +820,6 @@ module Redmine
         
         if coords[:bar_start] && coords[:bar_end]
           if options[:issue]
-			puts
             output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           else
             output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"            
