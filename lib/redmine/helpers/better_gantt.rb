@@ -646,15 +646,15 @@ module Redmine
         pdf.Output
       end
 
-      # Get the number of work days between two dates (include the days at both ends).
+      # Get the number of work days between two dates. This does not include the 
+      # end date, e.g. the result when the start_date equals the end_date is 0.
       # This assumes that the work week is Monday-Friday.
       # TODO: It's probably a bit odd to have date_to as the first parameter here.
       #       I just kept the same order as the original date subtraction code.
       def work_days_in(date_to, date_from)
-        if @work_on_weekends
-          # move the endpoints to the next Monday if they fall on a weekend
-          date_to += 8 - date_to.cwday if date_to.cwday >= 6
-          date_from += 8 - date_from.cwday if date_from.cwday >= 6
+        if !@work_on_weekends
+          date_to = ensure_workday(date_to)
+          date_from = ensure_workday(date_from)
         end
         days_in = date_to - date_from
         if @work_on_weekends
@@ -687,7 +687,9 @@ module Redmine
           end
 
           if progress
-            progress_date = start_date + (end_date - start_date + 1) * (progress / 100.0)
+            workdays = work_days_in(end_date, start_date) + 1
+            progress_days = workdays * (progress / 100.0)
+            progress_date = date_for_workdays(start_date, progress_days)
             if progress_date > self.date_from && progress_date > start_date
               if progress_date < self.date_to
                 coords[:bar_progress_end] = work_days_in(progress_date, self.date_from)
@@ -716,6 +718,33 @@ module Redmine
         coords
       end
 
+      # Get the end date for a given start date and duration of workdays.
+      # If the number of workdays is 0, the result is equal to the start date.
+      # If the number of workdays is 1, the result is equal to the next workday 
+      # that follows the start date.
+      def date_for_workdays(date_from, workdays)
+        if @work_on_weekends
+          return date_from + workdays
+        end
+        days_in = date_from + workdays
+        workdays_in_week = @work_on_weekends ? 7 : 5
+        weekends = (workdays / workdays_in_week).floor
+        date_to = date_from + workdays + (weekends * 2) # candidate result (might end on a weekend)
+        weekends += 1 if date_to.cwday >= 6
+        weekends += 1 if date_to.cwday < date_from.cwday
+        date_to = date_from + workdays + (weekends * 2) # final result
+        date_to
+      end
+      
+      # Ensure that the date falls on a workday. If the given date falls on a
+      # weekend, it is moved to the following Monday.
+      def ensure_workday(date)
+        if !@work_on_weekends
+          date += 8 - date.cwday if date.cwday >= 6
+        end
+        date
+      end
+      
       # Sorts a collection of issues by start_date, due_date, id for gantt rendering
       def sort_issues!(issues)
         issues.sort! { |a, b| gantt_issue_compare(a, b, issues) }
@@ -822,7 +851,7 @@ module Redmine
           if options[:issue]
             output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           else
-            output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"            
+            output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           end
           
           if coords[:bar_late_end]
