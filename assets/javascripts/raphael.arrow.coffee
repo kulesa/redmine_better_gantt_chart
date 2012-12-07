@@ -11,22 +11,30 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
     "duplicated": "- "
     "blocked": "-"
     "relates": "."
- 
+  
+  # Shorthand functions for formatting SVG commands
+  cmd = (cmd, a...) ->  cmd.concat(" ", a.join(" "), " ")
+  M = (x, y) -> cmd("M", x, y)
+  m = (x, y) -> cmd("m", x, y)
+  L1 = (x1, y1) -> cmd("L", x1, y1)
+  l2 = (x1, y1, x2, y2) -> cmd("l", x1, y1, x2, y2)
+
   line = (x1, y1, x2, y2) ->
-    ["M", x1, y1, "L", x2, y2]
+    M(x1, y1) + L1(x2, y2)
 
   triangle = (cx, cy, r) ->
-    r *= 1.75
-    "M".concat(cx, ",", cy, "m0-", r * .58, "l", r * .5, ",", r * .87, "-", r, ",0z")
+    r *= 1.5
+    "".concat(M(cx,cy), m(0,-1*r*.58), l2(r*.5, r*.87, -r, 0), " z")
 
   [x1, y1, x6, y6] = coords
+  x1 += 3
 
   arrow = @set()
   
-  deltaX = 6
+  deltaX = 7
   deltaY = 8
   
-  [x2, y2] = [x1 + deltaX, y1]
+  [x2, y2] = [x1 + deltaX - 3, y1]
   [x5, y5] = [x6 - deltaX, y6]
   
   if y1 < y6
@@ -38,7 +46,7 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
     [x4, y4] = [x3, y5]
   else
     [x4, y4] = [x5, y3]
-  
+
   arrow.push @path(line(x1, y1, x2, y2))
   arrow.push @path(line(x2, y2, x3, y3))
   arrow.push @path(line(x3, y3, x4, y4))
@@ -47,7 +55,6 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
   arrowhead = arrow.push(@path(triangle(x6 + deltaX - 5, y6 + 1, 5)).rotate(90))
   arrow.toFront()
   arrow.attr({fill: "#444", stroke: "#222", "stroke-dasharray": relationDash[relationType]})
-  
 ###
 Draws connection arrows over the gantt chart
 ###
@@ -55,24 +62,29 @@ window.redrawGanttArrows = () ->
   paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
   paper.clear
   window.paper = paper
+  paper.canvas.style.position = "absolute"
+  paper.canvas.style.zIndex = "50"
 
   # Relation attributes
   relationAttrs = ["follows", "blocked", "duplicated", "relates"]
   
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
-    [fromOffsetX, fromOffsetY] = from.positionedOffset()
-    [toOffsetX, toOffsetY]     = to.positionedOffset()
-    if to.hasClassName('parent')
+    to = $('#'+to.id)
+    [fromOffsetX, fromOffsetY] = [from.position().left, from.position().top]
+    [toOffsetX, toOffsetY]     = [to.position().left, to.position().top]
+    if to.hasClass('parent')
       typeOffsetX = 10
     else
       typeOffsetX = 6
-    [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight()/2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight()/2]
+    anchors = [fromOffsetX + from.width() - 1, fromOffsetY + from.height()/2, toOffsetX - typeOffsetX, toOffsetY + to.height()/2]
+    anchors
 
   # Draw arrows for all tasks, which have dependencies
-  $$('div.task_todo').each (element) ->
+  $('div.task_todo').each (element) ->
+    element = this
     for relationAttribute in relationAttrs
-      if (related = element.readAttribute(relationAttribute))
+      if (related = element.getAttribute(relationAttribute))
         for id in related.split(',')
-          if (item = $(id))
+          if (item = $('#'+id))
             paper.ganttArrow calculateAnchors(item, element), relationAttribute

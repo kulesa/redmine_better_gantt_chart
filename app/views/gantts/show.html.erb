@@ -42,8 +42,8 @@
 
   subject_width = 330
   header_heigth = 18
+  line_height = 18
 
-  headers_height = header_heigth
   show_years = true
   show_weeks = false
   show_days  = false
@@ -55,7 +55,7 @@
     show_weeks = true
     if @gantt.zoom > 2
       show_days = true
-      headers_height = (2.75 * header_heigth).to_i
+      headers_height = (3 * header_heigth).to_i
       if @gantt.zoom > 3
         show_day_numbers = true
         headers_height = (3.25 * header_heigth).to_i
@@ -69,8 +69,9 @@
                 :zoom => zoom,
                 :g_width => g_width,
                 :subject_width => subject_width)
-  g_height = [(18 * (@gantt.number_of_rows + 6)) + 0, 208 ].max
-  t_height = g_height + headers_height
+  g_height = [(line_height * (@gantt.number_of_rows + 6)) + 0, 208 ].max
+  t_height = g_height + headers_height;
+  s_height = 24;
 %>
 
 <% if @gantt.truncated %>
@@ -83,7 +84,7 @@
   <%
     style  = ""
     style += "position:relative;"
-    style += "height: #{t_height + 24}px;"
+    style += "height: #{t_height + s_height}px;"
     style += "width: #{subject_width + 1}px;"
   %>
   <%= content_tag(:div, :style => style) do %>
@@ -111,7 +112,7 @@
 </td>
 
 <td>
-<div style="position:relative;height:<%= t_height + 24 %>px;overflow:auto;">
+<div id="gantt_lines" style="position:relative;height:<%= t_height + s_height %>px;overflow:auto;">
 <%
   style  = ""
   style += "width: #{g_width - 1}px;"
