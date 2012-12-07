@@ -89,7 +89,6 @@ This plugin draws arrows on Redmine gantt chart.
     relationAttrs = ["follows", "blocked", "duplicated", "relates"];
     calculateAnchors = function(from, to) {
       var anchors, fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref1;
-      to = $('#' + to.id);
       _ref = [from.position().left, from.position().top], fromOffsetX = _ref[0], fromOffsetY = _ref[1];
       _ref1 = [to.position().left, to.position().top], toOffsetX = _ref1[0], toOffsetY = _ref1[1];
       if (to.hasClass('parent')) {
@@ -101,8 +100,9 @@ This plugin draws arrows on Redmine gantt chart.
       return anchors;
     };
     return $('div.task_todo').each(function(element) {
-      var id, item, related, relationAttribute, _i, _len, _results;
+      var from, id, item, related, relationAttribute, to, _i, _len, _results;
       element = this;
+      console.log(element);
       _results = [];
       for (_i = 0, _len = relationAttrs.length; _i < _len; _i++) {
         relationAttribute = relationAttrs[_i];
@@ -114,7 +114,13 @@ This plugin draws arrows on Redmine gantt chart.
             for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
               id = _ref[_j];
               if ((item = $('#' + id))) {
-                _results1.push(paper.ganttArrow(calculateAnchors(item, element), relationAttribute));
+                from = item;
+                to = $('#' + element.id);
+                if ((from.position() != null) && (to.position() != null)) {
+                  _results1.push(paper.ganttArrow(calculateAnchors(from, to), relationAttribute));
+                } else {
+                  _results1.push(void 0);
+                }
               } else {
                 _results1.push(void 0);
               }

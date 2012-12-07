@@ -70,7 +70,6 @@ window.redrawGanttArrows = () ->
   
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
-    to = $('#'+to.id)
     [fromOffsetX, fromOffsetY] = [from.position().left, from.position().top]
     [toOffsetX, toOffsetY]     = [to.position().left, to.position().top]
     if to.hasClass('parent')
@@ -83,8 +82,12 @@ window.redrawGanttArrows = () ->
   # Draw arrows for all tasks, which have dependencies
   $('div.task_todo').each (element) ->
     element = this
+    console.log(element)
     for relationAttribute in relationAttrs
       if (related = element.getAttribute(relationAttribute))
         for id in related.split(',')
           if (item = $('#'+id))
-            paper.ganttArrow calculateAnchors(item, element), relationAttribute
+            from = item
+            to = $('#'+element.id)
+            if from.position()? and to.position()?
+              paper.ganttArrow calculateAnchors(from, to), relationAttribute
