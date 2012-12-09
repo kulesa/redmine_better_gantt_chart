@@ -25,8 +25,10 @@ module RedmineBetterGanttChart
           "<br /><br />" +
           "<strong>#{@cached_label_project}</strong>: #{link_to_project(issue.project)}<br />" +
           "<strong>#{@cached_label_status}</strong>: #{issue.status.name}<br />" +
-          "<strong>#{@cached_label_start_date}</strong>: #{format_date(issue.start_date)}<br />" +
-          "<strong>#{@cached_label_due_date}</strong>: #{format_date(issue.due_date)}<br />" +
+          "<strong>#{@cached_label_start_date}</strong>: ".html_safe +
+          "<span id='tooltip_start_date_i#{issue.id}'>#{format_date(issue.start_date)}</span><br />".html_safe +
+          "<strong>#{@cached_label_due_date}</strong>: ".html_safe +
+          "<span id='tooltip_due_date_i#{issue.id}'>#{format_date(issue.due_date)}</span><br />".html_safe +
           "<strong>#{@cached_label_assigned_to}</strong>: #{issue.assigned_to}<br />" +
           "<strong>#{@cached_label_priority}</strong>: #{issue.priority.name}"
         ).html_safe

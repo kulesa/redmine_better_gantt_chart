@@ -1,6 +1,10 @@
 require_dependency 'issue'
 require_dependency 'project'
 
+unless ApplicationHelper.included_modules.include? RedmineBetterGanttChart::ApplicationHelperPatch
+  ApplicationHelper.send(:include, RedmineBetterGanttChart::ApplicationHelperPatch)
+end
+
 unless IssuesHelper.included_modules.include? RedmineBetterGanttChart::IssuesHelperPatch
   IssuesHelper.send(:include, RedmineBetterGanttChart::IssuesHelperPatch)
 end

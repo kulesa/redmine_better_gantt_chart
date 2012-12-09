@@ -8,3 +8,4 @@ en:
   label_disabled: "Disabled"
   description_enabled: "a week has 7 working days. Issues can start and finish on weekends when automatically rescheduled. Issue duration includes weekends."
   description_disabled: "a week has 5 working days. If start or due date falls on a weekend when the issue is rescheduled automatically, it is moved to the next Monday. Note, that with any value of the setting start and due dates can always be set to a weekend manually."
+  text_edit_gantt_lack_of_permission: "You do not have permission to edit issues."

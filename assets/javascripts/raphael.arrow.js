@@ -80,17 +80,23 @@ This plugin draws arrows on Redmine gantt chart.
 
 
   window.redrawGanttArrows = function() {
-    var calculateAnchors, paper, relationAttrs;
-    paper = Raphael("gantt_lines", "100%", "100%");
-    paper.clear;
+    var calculateAnchors, paperDom, relationAttrs;
+    if (window.paper != null) {
+      paperDom = paper.canvas;
+      paperDom.parentNode.removeChild(paperDom);
+    }
+    this.paper = Raphael("gantt-container", "100%", "100%");
     window.paper = paper;
+    paper.clear;
     paper.canvas.style.position = "absolute";
-    paper.canvas.style.zIndex = "50";
+    paper.canvas.style.zIndex = "10";
     relationAttrs = ["follows", "blocked", "duplicated", "relates"];
     calculateAnchors = function(from, to) {
-      var anchors, fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref1;
-      _ref = [from.position().left, from.position().top], fromOffsetX = _ref[0], fromOffsetY = _ref[1];
-      _ref1 = [to.position().left, to.position().top], toOffsetX = _ref1[0], toOffsetY = _ref1[1];
+      var anchors, fromOffsetX, fromOffsetY, paperX, paperY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref1;
+      paperX = $(paper.canvas).offset().left;
+      paperY = $(paper.canvas).offset().top;
+      _ref = [from.offset().left - paperX, from.offset().top - paperY], fromOffsetX = _ref[0], fromOffsetY = _ref[1];
+      _ref1 = [to.offset().left - paperX, to.offset().top - paperY], toOffsetX = _ref1[0], toOffsetY = _ref1[1];
       if (to.hasClass('parent')) {
         typeOffsetX = 10;
       } else {
@@ -102,7 +108,6 @@ This plugin draws arrows on Redmine gantt chart.
     return $('div.task_todo').each(function(element) {
       var from, id, item, related, relationAttribute, to, _i, _len, _results;
       element = this;
-      console.log(element);
       _results = [];
       for (_i = 0, _len = relationAttrs.length; _i < _len; _i++) {
         relationAttribute = relationAttrs[_i];
@@ -113,10 +118,10 @@ This plugin draws arrows on Redmine gantt chart.
             _results1 = [];
             for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
               id = _ref[_j];
-              if ((item = $('#' + id))) {
+              if ((item = $('#task_todo_i' + id))) {
                 from = item;
                 to = $('#' + element.id);
-                if ((from.position() != null) && (to.position() != null)) {
+                if ((from.offset() != null) && (to.offset() != null)) {
                   _results1.push(paper.ganttArrow(calculateAnchors(from, to), relationAttribute));
                 } else {
                   _results1.push(void 0);

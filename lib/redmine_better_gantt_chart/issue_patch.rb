@@ -14,6 +14,17 @@ module RedmineBetterGanttChart
       def external?
         !!@external
       end
+      
+      def all_precedes_issues
+        dependencies = []
+        relations_from.each do |relation|
+          next unless relation.relation_type == IssueRelation::TYPE_PRECEDES
+          dependencies << relation.issue_to
+          dependencies += relation.issue_to.all_dependent_issues
+        end
+        dependencies
+      end
+      
     end
   end
 end

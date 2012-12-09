@@ -1,5 +1,13 @@
-<%= javascript_include_tag "raphael-min.js", :plugin => "redmine_better_gantt_chart" %>
-<%= javascript_include_tag "raphael.arrow.js", :plugin => "redmine_better_gantt_chart" %>
+<% content_for :header_tags do %>
+	<%= javascript_include_tag "raphael-min.js", :plugin => "redmine_better_gantt_chart" %>
+	<%= javascript_include_tag "raphael.arrow.js", :plugin => "redmine_better_gantt_chart" %>
+	<%= javascript_include_tag "jquery.observe_field.js", :plugin => "redmine_better_gantt_chart" %>
+	<%= stylesheet_link_tag "better_gantt.css", :plugin => "redmine_better_gantt_chart" %>
+<% end %>
+
+<% @gantt.view = self %>
+
+<% include_calendar_headers_tags %>
 <% @gantt.view = self %>
 <h2><%= @query.new_record? ? l(:label_gantt) : h(@query.name) %></h2>
 
@@ -40,7 +48,7 @@
   zoom = 1
   @gantt.zoom.times { zoom = zoom * 2 }
 
-  subject_width = 330
+  subject_width = 280
   header_heigth = 18
   line_height = 18
 
@@ -74,6 +82,149 @@
   s_height = 24;
 %>
 
+<input type="hidden" name="_date_from" id="i_date_from" value="<%= h(@gantt.date_from) %>" />
+<input type="hidden" name="_date_to" id="i_date_to" value="<%= h(@gantt.date_to) %>" />
+<input type="hidden" name="zm" id="i_zm" value="<%= zoom %>" />
+<input type="hidden" name="pzm" id="i_pzm" value="<%= @gantt.zoom %>" />
+<script type='text/javascript'>
+  function issue_moved(elem) {
+    var id_str = elem.id.substring(3, elem.id.length);
+    var v_date_from = document.getElementById('i_date_from').getAttribute("value");
+    var v_date_to = document.getElementById('i_date_to').getAttribute("value");
+    var v_zm = document.getElementById('i_zm').getAttribute("value");
+    var v_pzm = document.getElementById('i_pzm').getAttribute("value");
+    var url_str = '<%=  url_for(:controller=>:gantts, :action => :edit_gantt) %>';
+    url_str = url_str + "/" + id_str;
+    var day = parseInt(elem.style.left)/parseInt(v_zm);
+    console.log("day:", day, "left:"); //, elem.style.left, "zoom:", v_zm);
+    var jqxhr = $.post(url_str, 
+      'day='+day+'&date_from='+v_date_from+'&date_to='+v_date_to+'&zoom='+v_pzm+"&project_id=<%= @project.to_param %>",
+      null, 'text')
+    .success(function(request) { change_dates(request); })
+    .error(function(request) { handle_failure(request.responseText); });
+  }
+
+  function handle_failure(res_text) {
+    var text = res_text.split('|');
+    alert(text[0]);
+    if (text.length == 1) {
+      return;
+    }
+    change_dates(text[1]);//revert
+  }
+
+  function change_dates(issue_infos) {
+    if (!issue_infos) {
+      return;
+    }
+    var issue_list = issue_infos.split("|");
+    for (i = 0; i < issue_list.length; i++) {
+      change_date(issue_list[i]);
+    }
+    window.redrawGanttArrows()
+  }
+
+  function change_date(text) {
+    if (!text) {
+      return;
+    }
+    var issue_info = text.split("=");
+    var elem_id = issue_info[0];
+    var kind = elem_id.substring(0,1);
+    var preClassName = "";
+    if (kind == 'v') {
+      preClassName = "version ";
+    } else if (kind == 'p') {
+      preClassName = "project ";
+    }
+    var vals = issue_info[1].split(',');
+    var zoom = document.getElementById('i_zm').getAttribute("value");
+    //zoom /=     var v_zm = document.getElementById('i_zm').getAttribute("value");
+
+	
+    var start_date_elem = document.getElementById(elem_id + '_start_date_str');
+    if (!start_date_elem) {
+      //target not exists
+      return;
+    }
+    start_date_elem.innerHTML = vals[0];
+    var tooltip_start_date_elem = document.getElementById('tooltip_start_date_' + elem_id);
+    if (tooltip_start_date_elem) {
+      tooltip_start_date_elem.innerHTML = vals[0];
+    }
+    var due_date_elem = document.getElementById(elem_id + '_due_date_str');
+    if (due_date_elem) {
+      due_date_elem.innerHTML = vals[2];
+    }
+    
+    var tooltip_due_date_elem = document.getElementById('tooltip_due_date_' + elem_id);
+    if (tooltip_due_date_elem) {
+      tooltip_due_date_elem.innerHTML = vals[2];
+    }
+    
+    var ev_elem = document.getElementById('ev_' + elem_id);
+    if (ev_elem) {
+      ev_elem.style.left = vals[4] + 'px';
+      ev_elem.style.width = (parseInt(vals[5])+100)+'px';
+    }
+    var todo_elem = document.getElementById('task_todo_' + elem_id);
+    if (todo_elem) {
+      todo_elem.style.width = vals[5] + 'px';
+      if (kind == "i") { console.log(ev_elem.id, vals[4]/zoom, vals[4]); }
+    }
+    
+    var late_elem = document.getElementById('task_late_' + elem_id);
+    if (late_elem) {
+      var parentStr = "";
+      if (late_elem.className.indexOf("parent") > 0) parentStr = "parent ";
+      late_elem.style.width = vals[6] + 'px';
+      if (vals[6] == '0') {
+        late_elem.className = preClassName + 'task ' + parentStr + 'task_none';
+      } else {
+        late_elem.className = preClassName + 'task ' + parentStr + 'task_late';
+      }
+    }
+    var done_elem = document.getElementById('task_done_' + elem_id);
+    if (done_elem) {
+      var parentStr = "";
+      if (done_elem.className.indexOf("parent") > 0) parentStr = "parent ";
+      done_elem.style.width = vals[7] + 'px';
+      if (vals[7] == '0') {
+        done_elem.className = preClassName + 'task ' + parentStr + 'task_none';
+      } else {
+        done_elem.className = preClassName + 'task ' + parentStr + 'task_done';
+      }
+    }
+    var tooltip = document.getElementById("tt_" + elem_id);
+    if (tooltip) {
+      tooltip.style.left = ev_elem.style.left;
+    }
+
+    var label = document.getElementById("label_" + elem_id);
+    if (label) {
+      label.style.left = (parseInt(vals[4]) + parseInt(vals[5]) + 8) + 'px';
+    }
+    var marker_start = document.getElementById("marker_start_" + elem_id);
+    if (marker_start && vals[8]) {
+      marker_start.style.left = vals[8] + 'px';
+    }
+    var marker_end = document.getElementById("marker_end_" + elem_id);
+    if (marker_end && vals[9]) {
+      marker_end.style.left = vals[9] + 'px';
+    }
+
+    //change calendar date
+    var elm1 = document.getElementById(elem_id+"_hidden_start_date");
+    if (elm1) elm1.value = vals[1];
+    var elm2 = document.getElementById(elem_id+"_start_date");
+    if (elm2) elm2.value = vals[1];
+    var elm3 = document.getElementById(elem_id+"_hidden_due_date");
+    if (elm3) elm3.value = vals[3];
+    var elm4 = document.getElementById(elem_id+"_due_date");
+    if (elm4) elm4.value = vals[3];
+  }
+</script>
+
 <% if @gantt.truncated %>
   <p class="warning"><%= l(:notice_gantt_chart_truncated, :max => @gantt.max_rows) %></p>
 <% end %>
@@ -85,13 +236,13 @@
     style  = ""
     style += "position:relative;"
     style += "height: #{t_height + s_height}px;"
-    style += "width: #{subject_width + 1}px;"
+    style += "width: #{subject_width - 2}px;"
   %>
   <%= content_tag(:div, :style => style) do %>
     <%
       style  = ""
       style += "right:-2px;"
-      style += "width: #{subject_width}px;"
+      style += "width: #{subject_width - 2}px;"
       style += "height: #{headers_height}px;"
       style += 'background: #eee;'
     %>
@@ -99,7 +250,7 @@
     <%
       style  = ""
       style += "right:-2px;"
-      style += "width: #{subject_width}px;"
+      style += "width: #{subject_width - 2}px;"
       style += "height: #{t_height}px;"
       style += 'border-left: 1px solid #c0c0c0;'
       style += 'overflow: hidden;'
@@ -111,8 +262,19 @@
   <% end %>
 </td>
 
+<% ### Calendar column ### %>
+<td style="width:180px; padding:0px;">
+<div style="position:relative;height:<%= t_height + 24 %>px;width:180px;">
+<div style="width:181px;height:<%= headers_height %>px;background: #eee;" class="gantt_hdr"></div>
+<div style="width:181px;height:<%= t_height %>px;overflow:hidden;" class="gantt_hdr"></div>
+<div class="gantt_subjects">
+  <%= @gantt.calendars.html_safe %>
+</div>
+</div>
+</td>
+
 <td>
-<div id="gantt_lines" style="position:relative;height:<%= t_height + s_height %>px;overflow:auto;">
+<div style="position:relative;height:<%= t_height + s_height %>px;overflow-x:auto;overflow-y:hidden;" id="gantt-container">
 <%
   style  = ""
   style += "width: #{g_width - 1}px;"
