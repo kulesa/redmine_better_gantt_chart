@@ -740,7 +740,6 @@ module Redmine
         if fv && fv.effective_date && !@issue.due_date && fv.effective_date < @issue.start_date
           @issue.start_date = old_start_date
         end
-        puts "-----------------------------"
 
         begin
           @issue.save!
@@ -755,9 +754,6 @@ module Redmine
           #check dependencies
           issues = @issue.all_precedes_issues
           issues.each do |i|
-            i.save
-            puts 'Updating %s (start %s)' % [i.id, i.start_date]
-            #puts "Cached changes: %s" % [ Redmine::Issue.cached_values(i.id, :start_date) ]
             o = get_issue_position(i, pms[:zoom])
             text += "|i#{i.id}=#{format_date(i.start_date)},#{i.start_date},#{format_date(i.due_before)},#{i.due_before},#{o[0]},#{o[1]},#{o[2]},#{o[3]}".html_safe
             text = set_project_data(i.project, pms[:zoom], text, prj_map)
@@ -805,7 +801,6 @@ module Redmine
         weekends_in = (days_in / 7).floor
         weekends_in += direction if date_to.cwday * direction < date_from.cwday * direction
         work_days = days_in - (weekends_in * 2)
-        #puts "workdays_in (%s, %s): %s" % [ date_to, date_from, work_days ]
         work_days
       end
 
@@ -1024,7 +1019,7 @@ module Redmine
           output << "  <div id='task_todo_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css]} task_todo'>&nbsp;</div>\n"
           output << "  <div id='task_late_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>\n"
           output << "  <div id='task_done_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>\n"
-          #output << "</div>"
+          output << "</div>"
         end
 
         # Renders the markers
@@ -1051,14 +1046,17 @@ module Redmine
         end
 
         # Finish rendering draggable area
-        #output << "</div>"
-        output << "<script type='text/javascript'>\n"
-        output << "$('#ev_#{options[:kind]}#{options[:id]}').draggable({ \n"
-        output << "  axis: 'x', "
-        output << "  grid: [#{params[:zoom]}, 0], "
-        output << "  stop: function(event, ui) { issue_moved(event.target);},"
-        output << "});\n"
-        output << "</script>\n"
+        if coords[:bar_start] && coords[:bar_end]
+          #output << "</div>\n"
+          
+          output << "<script type='text/javascript'>\n"
+          output << "$('#ev_#{options[:kind]}#{options[:id]}').draggable({ \n"
+          output << "  axis: 'x', "
+          output << "  grid: [#{params[:zoom]}, 0], "
+          output << "  stop: function(event, ui) { issue_moved(event.target);},"
+          output << "});\n"
+          output << "</script>\n"
+        end
         
         @lines << output
         output

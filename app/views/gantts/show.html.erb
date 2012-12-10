@@ -96,7 +96,6 @@
     var url_str = '<%=  url_for(:controller=>:gantts, :action => :edit_gantt) %>';
     url_str = url_str + "/" + id_str;
     var day = parseInt(elem.style.left)/parseInt(v_zm);
-    console.log("day:", day, "left:"); //, elem.style.left, "zoom:", v_zm);
     var jqxhr = $.post(url_str, 
       'day='+day+'&date_from='+v_date_from+'&date_to='+v_date_to+'&zoom='+v_pzm+"&project_id=<%= @project.to_param %>",
       null, 'text')
@@ -170,7 +169,6 @@
     var todo_elem = document.getElementById('task_todo_' + elem_id);
     if (todo_elem) {
       todo_elem.style.width = vals[5] + 'px';
-      if (kind == "i") { console.log(ev_elem.id, vals[4]/zoom, vals[4]); }
     }
     
     var late_elem = document.getElementById('task_late_' + elem_id);
@@ -279,7 +277,7 @@
   style  = ""
   style += "width: #{g_width - 1}px;"
   style += "height: #{headers_height}px;"
-  style += 'background: #eee;'
+  style += "background: #eee;"
 %>
 <%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => "gantt_hdr") %>
 
@@ -304,7 +302,7 @@
 <% if show_years %>
   <%
     left = 0
-    height = (show_weeks ? header_heigth : header_heigth + g_height)
+    height = (show_weeks ? headers_height : headers_height + g_height)
     years = 1
     months_remaining = @gantt.months - (12 - @gantt.date_from.month) - 1
     years += months_remaining <= 0 ? 0 : (months_remaining / 12).to_i + 1
@@ -316,7 +314,7 @@
         work_days = @gantt.work_days_in(Date.new(year + 1), @gantt.date_from)
         months_remaining -= 12 - (@gantt.date_from.month).to_i - 1
       elsif months_remaining < 12
-        work_days = @gantt.work_days_in(Date.new(year, months_remaining+1, 1), Date.new(year))
+        work_days = @gantt.work_days_in(Date.new(year, months_remaining, 1), Date.new(year))
         months_remaining = 0
       else
         work_days = @gantt.work_days_in(Date.new(year + 1), Date.new(year))

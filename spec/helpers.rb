@@ -24,6 +24,5 @@ module Helpers
   def draw_from_date(date_from, issue)
     start_date = issue.start_date
     due_date = issue.due_date || issue.start_date
-    puts " "*(start_date - date_from) + "#"*(due_date - start_date)
   end
 end

@@ -66,7 +66,6 @@ module RedmineBetterGanttChart
       end
 
       def reschedule_dependent_issue(issue = self, options = {}) #start_date_to = nil, due_date_to = nil
-        puts "Rescheduling dependent issue (%s), options: \n%s" % [issue.id, options]
         cache_change(issue, options)
         process_child_issues(issue) if !issue.leaf?
         process_following_issues(issue)
