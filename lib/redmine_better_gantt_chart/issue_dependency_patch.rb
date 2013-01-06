@@ -5,7 +5,7 @@ module RedmineBetterGanttChart
 
       base.class_eval do
         alias_method_chain :reschedule_following_issues, :fast_update
-        alias_method_chain :reschedule_after, :earlier_date
+        alias_method_chain :reschedule_on!, :earlier_date
         alias_method_chain :soonest_start, :dependent_parent_validation
         alias_method_chain :duration, :work_days
       end
@@ -206,8 +206,8 @@ module RedmineBetterGanttChart
         end
       end
 
-      # Changes behaviour of reschedule_after method
-      def reschedule_after_with_earlier_date(date)      
+      # Changes behaviour of reschedule_on method
+      def reschedule_on_with_earlier_date!(date)      
         return if date.nil?
 
         if start_date.blank? || start_date != date
