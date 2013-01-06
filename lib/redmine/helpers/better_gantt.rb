@@ -184,7 +184,7 @@ module Redmine
       end
 
       def render(options={})
-        options = {:top => 0, :top_increment => 20, :indent_increment => 20, :render => :subject, :format => :html}.merge(options)
+        options = {:top => 0, :top_increment => 18, :indent_increment => 18, :render => :subject, :format => :html}.merge(options)
         indent = options[:indent] || 4
 
         @subjects = '' unless options[:only] == :lines
@@ -414,10 +414,11 @@ module Redmine
 
         subject_width = 400
         header_height = 18
+	line_height = 18
         # width of one day in pixels
         zoom = @zoom*2
         g_width = (work_days_in(@date_to, @date_from) + 1)*zoom
-        g_height = 20 * number_of_rows + 30
+        g_height = (line_height * (number_of_rows + 2)) + 0
         headers_height = (show_weeks ? 2*header_height : header_height)
         height = g_height + headers_height
 
@@ -427,7 +428,7 @@ module Redmine
 
         # Subjects
         gc.stroke('transparent')
-        subjects(:image => gc, :top => (headers_height + 20), :indent => 4, :format => :image)
+        subjects(:image => gc, :top => (headers_height + line_height), :indent => 4, :format => :image)
 
         # Months headers
         month_f = @date_from
