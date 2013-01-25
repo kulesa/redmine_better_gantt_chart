@@ -151,7 +151,8 @@ module RedmineBetterGanttChart
             if options[:parent]
               new_dates[other_attr] = issue.send(other_attr)
             else
-              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(issue.send(other_attr), new_dates[changed_attr] - issue.send(changed_attr))
+              shift = issue.send(changed_attr) ? new_dates[changed_attr] - issue.send(changed_attr) : 0
+              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(issue.send(other_attr), shift)
             end
           end
         end
