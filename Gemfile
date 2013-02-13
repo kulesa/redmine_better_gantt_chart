@@ -8,5 +8,5 @@ group :test do
   gem 'rspec-rails', "~> 2.10.0"
   gem 'factory_girl', "~>3.5.0"
   gem 'database_cleaner'
-  gem 'RedCloth', "~> 4.2.9"
+  gem 'RedCloth'
 end
