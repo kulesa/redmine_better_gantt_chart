@@ -24,14 +24,23 @@ module RedmineBetterGanttChart
       if RedmineBetterGanttChart.work_on_weekends?
         end_date
       else
+        start_date = date
         if shift > 0
-          diff_date = end_date + weekends_between(date, end_date).days
-          next_working_day(diff_date)
+          while true
+            break if (range = weekends_between(start_date, end_date).days) == 0
+            start_date = end_date
+            start_date += 1.days if start_date.wday == 6 || start_date.wday == 0
+            end_date = end_date + range
+          end
+          next_working_day(end_date)
         else
-          weekend_diff = weekends_between(date, end_date)
-          weekend_diff -= 1 if weekend_diff > 0 # don't ask why
-          diff_date = end_date - weekend_diff.days
-          previous_working_day(diff_date)
+          while true
+            break if (weekend_diff = weekends_between(start_date, end_date)) == 0
+            start_date = end_date
+            start_date -= 1.days if start_date.wday == 6 || start_date.wday == 0
+            end_date = end_date - weekend_diff.days
+          end
+          previous_working_day(end_date)
         end
       end
     end
