@@ -151,8 +151,7 @@ module RedmineBetterGanttChart
             if options[:parent]
               new_dates[other_attr] = issue.send(other_attr)
             else
-              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(new_dates[changed_attr], RedmineBetterGanttChart::Calendar.workdays_between(issue.send(changed_attr), issue.send(other_attr)).to_i - 1)
-            end
+              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(new_dates[changed_attr], RedmineBetterGanttChart::Calendar.workdays_between(issue.send(changed_attr), issue.send(other_attr)).to_i - 1)            end
           end
         end
 
@@ -206,8 +205,8 @@ module RedmineBetterGanttChart
         end
       end
 
-      # Changes behaviour of reschedule_on! method
-      def reschedule_on_with_earlier_date!(date)
+      # Changes behaviour of reschedule_on method
+      def reschedule_on_with_earlier_date!(date)      
         return if date.nil?
 
         if start_date.blank? || start_date != date

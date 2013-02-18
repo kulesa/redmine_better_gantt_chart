@@ -59,26 +59,19 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
 Draws connection arrows over the gantt chart
 ###
 window.redrawGanttArrows = () ->
-  if window.paper?
-    # remove old paper if it exists
-    paperDom = paper.canvas
-    paperDom.parentNode.removeChild(paperDom)
-  @paper = Raphael("gantt-container", "100%", "100%")
-  window.paper = paper
+  paper = Raphael("gantt_lines", "100%", "100%") # check out 'gantt_lines' div, margin-right: -2048px FTW!
   paper.clear
-  # Keep arrows above the "today" marker
+  window.paper = paper
   paper.canvas.style.position = "absolute"
-  paper.canvas.style.zIndex = "10"
+  paper.canvas.style.zIndex = "50"
 
   # Relation attributes
   relationAttrs = ["follows", "blocked", "duplicated", "relates"]
   
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
-    paperX = $(paper.canvas).offset().left
-    paperY = $(paper.canvas).offset().top
-    [fromOffsetX, fromOffsetY] = [from.offset().left-paperX, from.offset().top-paperY]
-    [toOffsetX, toOffsetY]     = [to.offset().left-paperX, to.offset().top-paperY]
+    [fromOffsetX, fromOffsetY] = [from.position().left, from.position().top]
+    [toOffsetX, toOffsetY]     = [to.position().left, to.position().top]
     if to.hasClass('parent')
       typeOffsetX = 10
     else
@@ -92,8 +85,8 @@ window.redrawGanttArrows = () ->
     for relationAttribute in relationAttrs
       if (related = element.getAttribute(relationAttribute))
         for id in related.split(',')
-          if (item = $('#task_todo_i'+id))
+          if (item = $('#'+id))
             from = item
             to = $('#'+element.id)
-            if from.offset()? and to.offset()?
+            if from.position()? and to.position()?
               paper.ganttArrow calculateAnchors(from, to), relationAttribute
