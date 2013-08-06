@@ -7,12 +7,27 @@ module RedmineBetterGanttChart
 
       module ClassMethods
         def with_callbacks_disabled(*callbacks, &block)
-          callbacks.each {|callback|
-            self.skip_callback(callback)
+          callback_options={}
+          callback_hash= Hash[callbacks.map{|callback|
+              chain = send("_#{callback}_callbacks")
+              options = Hash[chain.map{|c| [c.filter,{:options=>c.options,:per_key=>c.per_key}]}]
+              callback_options.reverse_merge!(options)
+              chain_hash=Hash[chain.map{|c| [c.kind, chain.collect{|ch| ch.filter if ch.kind==c.kind}.compact]}]
+              [callback,chain_hash]
+            }
+          ]
+          callback_hash.each {|callback,filters|
+            filters.each{|filter,methods|
+              skip_callback(callback, filter, *methods)
+            }
           }
           yield
-          callbacks.each {|callback|
-            self.set_callback(callback)
+          callback_hash.each {|callback,filters|
+            filters.each{|filter,methods|
+              methods.each{|method|
+                set_callback(callback, filter, method, callback_options[method])
+              }
+            }
           }
         end
 
@@ -24,7 +39,7 @@ module RedmineBetterGanttChart
             :validation,
             :save,
             :update,
-            :destroy,
+            :destroy
           ]
           with_callbacks_disabled *all_callbacks, &block
         end
