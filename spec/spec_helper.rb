@@ -1,38 +1,29 @@
 # This file is copied to ~/spec when you run 'ruby script/generate rspec'
 # from the project root directory.
 ENV["RAILS_ENV"] = "test"
+require 'active_record'
+require 'active_record/connection_adapters/abstract_adapter'
+require 'active_record/connection_adapters/abstract_mysql_adapter'
 
 # Allows loading of an environment config based on the environment
-redmine_root = ENV["REDMINE_ROOT"] || File.dirname(__FILE__) + "/../../../.."
-require File.expand_path(redmine_root + "/config/environment")
-require 'spec'
-require 'spec/rails'
+redmine_root = ENV["REDMINE_ROOT"] || File.dirname(__FILE__) + "/../../.."
+require File.expand_path(redmine_root + "/config/environment", __FILE__)
+require 'rspec/rails'
 require 'factory_girl'
-require 'database_cleaner'
 
 require File.expand_path(File.dirname(__FILE__) + '/factories.rb')
 require File.expand_path(File.dirname(__FILE__) + '/helpers')
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
+  config.use_transactional_fixtures = false
+  require 'database_cleaner'
   DatabaseCleaner.strategy = :truncation
-  config.use_transactional_fixtures = true
-  config.use_instantiated_fixtures  = false
-  config.fixture_path = RAILS_ROOT + '/spec/fixtures/'
   config.include Helpers
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.run_all_when_everything_filtered = true
+  config.filter_run_including :focus => true
 
-  config.before(:suite) do 
+  config.before(:suite) do
     DatabaseCleaner.clean
   end
-
-  config.after(:suite) do 
-  end
-end
-
-# require the entire app if we're running under coverage testing,
-# so we measure 0% covered files in the report
-#
-# http://www.pervasivecode.com/blog/2008/05/16/making-rcov-measure-your-whole-rails-app-even-if-tests-miss-entire-source-files/
-if defined?(Rcov)
-  all_app_files = Dir.glob('{app,lib}/**/*.rb')
-  all_app_files.each{|rb| require rb}
 end

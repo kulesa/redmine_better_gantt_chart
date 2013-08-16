@@ -5,12 +5,12 @@ module RedmineBetterGanttChart
 
       base.class_eval do
         alias_method_chain :reschedule_following_issues, :fast_update
-        alias_method_chain :reschedule_after, :earlier_date
+        alias_method_chain :reschedule_on!, :earlier_date
         alias_method_chain :soonest_start, :dependent_parent_validation
         alias_method_chain :duration, :work_days
       end
     end
-  
+
     module InstanceMethods
 
       def create_journal_entry
@@ -35,7 +35,7 @@ module RedmineBetterGanttChart
         reschedule_parents
         ordered_changes = prepare_and_sort_changes_list(@changes)
 
-        Issue.with_all_callbacks_disabled do
+        Issue.skip_callbacks do
           transaction do
             ordered_changes.each do |the_changes|
               issue_id, changes = the_changes[1]
@@ -47,7 +47,7 @@ module RedmineBetterGanttChart
 
       def prepare_and_sort_changes_list(changes_list)
         ordered_changes = []
-        changes_list.each do |c| 
+        changes_list.each do |c|
           ordered_changes << [c[1][:due_date] || c[1][:start_date], c]
         end
         ordered_changes.sort!
@@ -76,12 +76,12 @@ module RedmineBetterGanttChart
         childs_with_nil_start_dates = []
 
         issue.leaves.each do |leaf|
-          start_date =       cached_value(issue, :start_date) 
+          start_date =       cached_value(issue, :start_date)
           child_start_date = cached_value(leaf, :start_date)
 
           cache_change(issue, :start_date => child_start_date) if start_date.nil?
 
-          if child_start_date.nil? or 
+          if child_start_date.nil? or
              (start_date > child_start_date) or
              (start_date < child_start_date and issue.start_date == leaf.start_date)
             reschedule_dependent_issue(leaf, :start_date => start_date)
@@ -104,10 +104,10 @@ module RedmineBetterGanttChart
       end
 
       def reschedule_parents
-        @parents.each_pair do |parent_id, children|
+        @parents.dup.each_pair do |parent_id, children|
           parent_min_start = min_parent_start(parent_id)
           parent_max_start = max_parent_due(parent_id)
-          cache_change(parent_id, :start_date => parent_min_start, 
+          cache_change(parent_id, :start_date => parent_min_start,
                                   :due_date   => parent_max_start)
 
           children.each do |child| # If parent's start is changing, change start_date of any childs that have empty start_date
@@ -119,9 +119,9 @@ module RedmineBetterGanttChart
           process_following_issues(Issue.find(parent_id))
         end
       end
-      
+
       # Caches changes to be applied later. If no attributes to change given, just caches current values.
-      # Use :parent => true to just change one date without changing the other. If :parent is not specified, 
+      # Use :parent => true to just change one date without changing the other. If :parent is not specified,
       # change of one of the issue dates will cause change of the other.
       #
       # If no options is provided existing, issue cache is initialized.
@@ -151,8 +151,7 @@ module RedmineBetterGanttChart
             if options[:parent]
               new_dates[other_attr] = issue.send(other_attr)
             else
-              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(issue.send(other_attr), new_dates[changed_attr] - issue.send(changed_attr))
-            end
+              new_dates[other_attr] = RedmineBetterGanttChart::Calendar.workdays_from_date(new_dates[changed_attr], RedmineBetterGanttChart::Calendar.workdays_between(issue.send(changed_attr), issue.send(other_attr)).to_i - 1)            end
           end
         end
 
@@ -163,7 +162,7 @@ module RedmineBetterGanttChart
 
       # Returns cached value or caches it if it hasn't been cached yet
       def cached_value(issue, attr)
-        issue_id = issue.is_a?(Integer) ? issue : issue.id 
+        issue_id = issue.is_a?(Integer) ? issue : issue.id
         cache_change(issue_id) unless @changes[issue_id]
         @changes[issue_id][attr] || @changes[issue_id][:start_date]
       end
@@ -206,25 +205,25 @@ module RedmineBetterGanttChart
         end
       end
 
-      # Changes behaviour of reschedule_after method
-      def reschedule_after_with_earlier_date(date)      
+      # Changes behaviour of reschedule_on method
+      def reschedule_on_with_earlier_date!(date)
         return if date.nil?
 
         if start_date.blank? || start_date != date
-          self.start_date = date
           if due_date.present?
             self.due_date = RedmineBetterGanttChart::Calendar.workdays_from_date(date, duration - 1)
           end
+          self.start_date = date
           save
         end
-      end    
+      end
 
       # Modifies validation of soonest start date for a new task:
       # if parent task has dependency, start date cannot be earlier than start date of the parent.
       def soonest_start_with_dependent_parent_validation
         @soonest_start ||= (
           relations_to.collect{|relation| relation.successor_soonest_start} +
-          ancestors.collect(&:soonest_start) + 
+          ancestors.collect(&:soonest_start) +
           [parent_start_constraint]
         ).compact.max
       end

@@ -6,7 +6,7 @@ describe 'Improved issue dependencies management' do
       work_on_weekends true
     end
 
-    before(:each) do 
+    before(:each) do
       @first_issue, @second_issue = create_related_issues("precedes")
     end
 
@@ -34,10 +34,10 @@ describe 'Improved issue dependencies management' do
     it 'doesn\'t allow set start date earlier than parent.soonest_start' do
       child_issue = Factory.build(:issue)
       child_issue.parent_issue_id = @second_issue.id
-      lambda {
+      expect {
         child_issue.start_date = @second_issue.start_date - 1
         child_issue.save!
-      }.should raise_error(ActiveRecord::RecordInvalid)
+      }.to raise_error(ActiveRecord::RecordInvalid)
     end
 
     it "doesn't fail when removing an only child issue from the parent" do
@@ -47,10 +47,10 @@ describe 'Improved issue dependencies management' do
       child_issue.save!
       parent_issue.reload
 
-      lambda {
+      expect {
         child_issue.parent_issue_id = nil
         child_issue.save!
-      }.should_not raise_error(NoMethodError)
+      }.not_to raise_error()
     end
 
     it "doesn't fail when assigning start_date to a child issue when parent's start_date is empty and siblings' start_dates are empty" do
@@ -63,10 +63,10 @@ describe 'Improved issue dependencies management' do
       child_issue2.save!
       parent_issue.reload
 
-      lambda {
+      expect {
         child_issue1.start_date = Date.today
         child_issue1.save!
-      }.should_not raise_error(ArgumentError)
+      }.not_to raise_error()
     end
 
     it "doesn't fail when start_date of an issue deep in hierarchy is changed from empty" do
@@ -92,20 +92,20 @@ describe 'Improved issue dependencies management' do
       child_issue2_1.save!
       child_issue2_2.save!
 
-      lambda {
+      expect {
         child_issue2_2.start_date = Date.today
         child_issue2_2.save!
-      }.should_not raise_error(ArgumentError)
+      }.not_to raise_error()
     end
 
     it "doesn't fail when an issue without start or due date becomes a parent issue" do
       parent_issue = Factory(:issue, :start_date => nil, :due_date => nil)
       child_issue = Factory(:issue, :due_date => nil)
 
-      lambda {
+      expect {
         child_issue.parent_issue_id = parent_issue.id
         child_issue.save!
-      }.should_not raise_error(NoMethodError)
+      }.not_to raise_error()
     end
 
     describe 'handles long dependency chains' do
@@ -136,9 +136,9 @@ describe 'Improved issue dependencies management' do
       end
 
       it 'and doesn\'t allow create circular dependencies' do
-        lambda {
+        expect {
           create_related_issues("precedes", @current_issue, @start_issue)
-        }.should raise_error(ActiveRecord::RecordInvalid)
+        }.to raise_error(ActiveRecord::RecordInvalid)
       end
     end
 
@@ -174,7 +174,7 @@ describe 'Improved issue dependencies management' do
         }.should change(@child2, :start_date).to(@child2.start_date - 2.days)
       end
 
-      it "should not fail when due_date of one of rescheduled issues is nil" do 
+      it "should not fail when due_date of one of rescheduled issues is nil" do
         initial, child = create_related_issues("precedes")
         parent = Factory(:issue, :due_date => nil)
         other_child = Factory(:issue, :due_date => nil)
@@ -212,7 +212,7 @@ describe 'Improved issue dependencies management' do
         parent_b.reload
 
         parent_start  = parent_b.start_date
-        parent_due    = parent_b.due_date 
+        parent_due    = parent_b.due_date
 
         child_a.due_date = child_a.due_date - 2.days
         child_a.save!
@@ -224,7 +224,7 @@ describe 'Improved issue dependencies management' do
 
       it "should reshedule a following task of a parent task, when the parent task itself being rescheduled after changes in it's child task" do
         parent = Factory(:issue)
-        child  = Factory(:issue, :start_date => Date.today, 
+        child  = Factory(:issue, :start_date => Date.today,
                                  :due_date   => Date.today + 1,
                                  :parent_issue_id => parent.id)
         follower = Factory(:issue, :start_date => Date.today, :due_date => Date.today + 1)

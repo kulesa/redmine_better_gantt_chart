@@ -1,14 +1,16 @@
-source 'http://rubygems.org'
-source 'http://gems.github.com'
+## -----------------------------------
+## Uncomment content of this Gemfile
+## only if you need to run plugin specs.
+## -----------------------------------
 
-group :test do
-  gem 'rake'
-  gem 'sqlite3'
-  gem 'mysql'
-  gem 'rspec', "~>1.3"
-  gem 'rspec-rails', "~>1.3"
-  gem 'factory_girl', "~>1.3"
-  gem 'database_cleaner'
-  gem 'test-unit', '1.2.3'
-  gem 'RedCloth', "~> 4.2.9"
-end
+#redmine_root = ENV["REDMINE_ROOT"] || File.dirname(__FILE__) + "/../../"
+#eval File.read File.expand_path(redmine_root + 'Gemfile', __FILE__)
+
+#group :test do
+  #gem 'rspec', "~> 2.14.0"
+  #gem 'rspec-rails', "~> 2.14.0"
+  #gem 'factory_girl', "~> 2.3.2"
+  #gem 'database_cleaner'
+  #gem 'mysql2'
+  #gem 'pry'
+#end
