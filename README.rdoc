@@ -17,13 +17,15 @@ The plugin improves functionality of Redmine Gantt Chart.
 
 == Compatibility
 
-Tested with Redmine versions: 1.1.0, 1.1.1, 1.1.2, 1.1.3, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3
+Tested with Redmine versions: 1.1.0, 1.1.1, 1.1.2, 1.1.3, 1.2, 1.3, 1.4, 2.2, 2.3
 
 == Installation and Setup
 
-1. Go to your #{RAILS_ROOT}/vendor/plugins directory
-2. Run 'git clone git://github.com/kulesa/redmine_better_gantt_chart.git'. Or if you don't have git, click '*Download*' button on this page, save and unpack archive in plugins directory, and rename extracted folder to '*redmine_better_gantt_chart*'
-3. Restart Redmine
+1. Go to releases page: https://github.com/kulesa/redmine_better_gantt_chart/releases
+2. For Redmine 2.x above download {version 0.9.0}[https://github.com/kulesa/redmine_better_gantt_chart/releases/download/v.0.9.0/redmine_better_gantt_chart_0.9.0.zip] or above. For Redmine 1.x download {version 0.6.1}[https://github.com/kulesa/redmine_better_gantt_chart/archive/v0.6.1.zip].
+3. Go to your #{RAILS_ROOT}/vendor/plugins directory
+4. Unzip downloaded archive and rename extracted folder to '*redmine_better_gantt_chart*' (if extracted folder has other name).
+5. Restart Redmine
 
 You should now see the plugin in *Administration* -> *Plugins*. The plugin does not require any database migrations.
 
