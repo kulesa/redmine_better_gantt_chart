@@ -1,8 +1,9 @@
 (function() {
   /*
   This plugin draws arrows on Redmine gantt chart.
-  */  Raphael.fn.ganttArrow = function(coords, relationType) {
-    var arrow, arrowhead, deltaX, deltaY, line, relationDash, triangle, x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+  */  var __slice = Array.prototype.slice;
+  Raphael.fn.ganttArrow = function(coords, relationType) {
+    var L1, M, arrow, arrowhead, cmd, deltaX, deltaY, l2, line, m, relationDash, triangle, x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
     if (relationType == null) {
       relationType = "follows";
     }
@@ -12,18 +13,36 @@
       "blocked": "-",
       "relates": "."
     };
+    cmd = function() {
+      var a, cmd;
+      cmd = arguments[0], a = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      return cmd.concat(" ", a.join(" "), " ");
+    };
+    M = function(x, y) {
+      return cmd("M", x, y);
+    };
+    m = function(x, y) {
+      return cmd("m", x, y);
+    };
+    L1 = function(x1, y1) {
+      return cmd("L", x1, y1);
+    };
+    l2 = function(x1, y1, x2, y2) {
+      return cmd("l", x1, y1, x2, y2);
+    };
     line = function(x1, y1, x2, y2) {
-      return ["M", x1, y1, "L", x2, y2];
+      return M(x1, y1) + L1(x2, y2);
     };
     triangle = function(cx, cy, r) {
-      r *= 1.75;
-      return "M".concat(cx, ",", cy, "m0-", r * .58, "l", r * .5, ",", r * .87, "-", r, ",0z");
+      r *= 1.5;
+      return "".concat(M(cx, cy), m(0, -1 * r * .58), l2(r * .5, r * .87, -r, 0), " z");
     };
     x1 = coords[0], y1 = coords[1], x6 = coords[2], y6 = coords[3];
+    x1 += 3;
     arrow = this.set();
-    deltaX = 6;
+    deltaX = 7;
     deltaY = 8;
-    _ref = [x1 + deltaX, y1], x2 = _ref[0], y2 = _ref[1];
+    _ref = [x1 + deltaX - 3, y1], x2 = _ref[0], y2 = _ref[1];
     _ref2 = [x6 - deltaX, y6], x5 = _ref2[0], y5 = _ref2[1];
     if (y1 < y6) {
       _ref3 = [x2, y6 - deltaY], x3 = _ref3[0], y3 = _ref3[1];
@@ -56,31 +75,35 @@
     paper = Raphael("gantt_lines", "100%", "100%");
     paper.clear;
     window.paper = paper;
+    paper.canvas.style.position = "absolute";
+    paper.canvas.style.zIndex = "24";
     relationAttrs = ["follows", "blocked", "duplicated", "relates"];
     calculateAnchors = function(from, to) {
-      var fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref2;
-      _ref = from.positionedOffset(), fromOffsetX = _ref[0], fromOffsetY = _ref[1];
-      _ref2 = to.positionedOffset(), toOffsetX = _ref2[0], toOffsetY = _ref2[1];
-      if (to.hasClassName('parent')) {
+      var anchors, fromOffsetX, fromOffsetY, toOffsetX, toOffsetY, typeOffsetX, _ref, _ref2;
+      _ref = [from.position().left, from.position().top], fromOffsetX = _ref[0], fromOffsetY = _ref[1];
+      _ref2 = [to.position().left, to.position().top], toOffsetX = _ref2[0], toOffsetY = _ref2[1];
+      if (to.hasClass('parent')) {
         typeOffsetX = 10;
       } else {
         typeOffsetX = 6;
       }
-      return [fromOffsetX + from.getWidth() - 1, fromOffsetY + from.getHeight() / 2, toOffsetX - typeOffsetX, toOffsetY + to.getHeight() / 2];
+      anchors = [fromOffsetX + from.width() - 1, fromOffsetY + from.height() / 2, toOffsetX - typeOffsetX, toOffsetY + to.height() / 2];
+      return anchors;
     };
-    return $$('div.task_todo').each(function(element) {
-      var id, item, related, relationAttribute, _i, _len, _results;
+    return $('div.task_todo').each(function(element) {
+      var from, id, item, related, relationAttribute, to, _i, _len, _results;
+      element = this;
       _results = [];
       for (_i = 0, _len = relationAttrs.length; _i < _len; _i++) {
         relationAttribute = relationAttrs[_i];
         _results.push((function() {
           var _i, _len, _ref, _results;
-          if ((related = element.readAttribute(relationAttribute))) {
+          if ((related = element.getAttribute(relationAttribute))) {
             _ref = related.split(',');
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               id = _ref[_i];
-              _results.push((item = $(id)) ? paper.ganttArrow(calculateAnchors(item, element), relationAttribute) : void 0);
+              _results.push((item = $('#' + id)) ? (from = item, to = $('#' + element.id), (from.position() != null) && (to.position() != null) ? paper.ganttArrow(calculateAnchors(from, to), relationAttribute) : void 0) : void 0);
             }
             return _results;
           }

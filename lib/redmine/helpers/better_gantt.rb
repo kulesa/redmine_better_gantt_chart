@@ -34,7 +34,8 @@ module Redmine
         end
       end
 
-      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :truncated, :max_rows
+      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, 
+                  :truncated, :max_rows, :work_on_weekends
       attr_accessor :query
       attr_accessor :project
       attr_accessor :view
@@ -58,6 +59,8 @@ module Redmine
         @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
         months = (options[:months] || User.current.pref[:gantt_months]).to_i
         @months = (months > 0 && months < 25) ? months : 6
+        @work_on_weekends = RedmineBetterGanttChart.work_on_weekends?
+        work_on_weekends = @work_on_weekends
 
         # Save gantt parameters as user preference (zoom and months count)
         if (User.current.logged? && (@zoom != User.current.pref[:gantt_zoom] || @months != User.current.pref[:gantt_months]))
@@ -87,15 +90,23 @@ module Redmine
       end
 
       def params
-        common_params.merge({  :zoom => zoom, :year => year_from, :month => month_from, :months => months })
+        common_params.merge({  :zoom => zoom, :year => year_from, 
+                               :month => month_from, :months => months,
+                               :work_on_weekends => work_on_weekends })
       end
 
       def params_previous
-        common_params.merge({:year => (date_from << months).year, :month => (date_from << months).month, :zoom => zoom, :months => months })
+        common_params.merge({:year => (date_from << months).year, 
+                             :month => (date_from << months).month, 
+                             :zoom => zoom, :months => months, 
+                             :work_on_weekends => work_on_weekends })
       end
 
       def params_next
-        common_params.merge({:year => (date_from >> months).year, :month => (date_from >> months).month, :zoom => zoom, :months => months })
+        common_params.merge({:year => (date_from >> months).year, 
+                             :month => (date_from >> months).month, 
+                             :zoom => zoom, :months => months, 
+                             :work_on_weekends => work_on_weekends })
       end
 
       # Returns the number of rows that will be rendered on the Gantt chart
@@ -173,7 +184,7 @@ module Redmine
       end
 
       def render(options={})
-        options = {:top => 0, :top_increment => 20, :indent_increment => 20, :render => :subject, :format => :html}.merge(options)
+        options = {:top => 0, :top_increment => 18, :indent_increment => 18, :render => :subject, :format => :html}.merge(options)
         indent = options[:indent] || 4
 
         @subjects = '' unless options[:only] == :lines
@@ -277,7 +288,7 @@ module Redmine
         # Skip versions that don't have a start_date or due date
         if project.is_a?(Project) && project.start_date && project.due_date
           options[:zoom] ||= 1
-          options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
+          options[:g_width] ||= (work_days_in(self.date_to, self.date_from) + 1) * options[:zoom]
 
           coords = coordinates(project.start_date, project.due_date, nil, options[:zoom])
           label = h(project)
@@ -315,7 +326,7 @@ module Redmine
         # Skip versions that don't have a start_date
         if version.is_a?(Version) && version.start_date && version.due_date
           options[:zoom] ||= 1
-          options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
+          options[:g_width] ||= (work_days_in(self.date_to, self.date_from) + 1) * options[:zoom]
 
           coords = coordinates(version.start_date, version.due_date, version.completed_pourcent, options[:zoom])
           label = "#{h version } #{h version.completed_pourcent.to_i.to_s}%"
@@ -377,10 +388,11 @@ module Redmine
         return unless issue.is_a?(Issue)
         if issue.due_before
           coords = coordinates(issue.start_date, issue.due_before, issue.done_ratio, options[:zoom])
-          label = "#{ issue.status.name } #{ issue.done_ratio }%"
+          label = "#{ issue.status.name }"
+          label += " #{ issue.done_ratio }%" if issue.done_ratio > 0 && issue.done_ratio < 100
         else
           coords = coordinates(issue.start_date, issue.start_date, 0, options[:zoom])
-          label = "#{ issue.status.name }%"
+          label = "#{ issue.status.name }"
         end
 
         case options[:format]
@@ -402,10 +414,11 @@ module Redmine
 
         subject_width = 400
         header_height = 18
+	line_height = 18
         # width of one day in pixels
         zoom = @zoom*2
-        g_width = (@date_to - @date_from + 1)*zoom
-        g_height = 20 * number_of_rows + 30
+        g_width = (work_days_in(@date_to, @date_from) + 1)*zoom
+        g_height = (line_height * (number_of_rows + 2)) + 0
         headers_height = (show_weeks ? 2*header_height : header_height)
         height = g_height + headers_height
 
@@ -415,7 +428,7 @@ module Redmine
 
         # Subjects
         gc.stroke('transparent')
-        subjects(:image => gc, :top => (headers_height + 20), :indent => 4, :format => :image)
+        subjects(:image => gc, :top => (headers_height + line_height), :indent => 4, :format => :image)
 
         # Months headers
         month_f = @date_from
@@ -634,6 +647,26 @@ module Redmine
         pdf.Output
       end
 
+      # Get the number of work days between two dates. This does not include the 
+      # end date, e.g. the result when the start_date equals the end_date is 0.
+      # This assumes that the work week is Monday-Friday.
+      # TODO: It's probably a bit odd to have date_to as the first parameter here.
+      #       I just kept the same order as the original date subtraction code.
+      def work_days_in(date_to, date_from)
+        if !@work_on_weekends
+          date_to = ensure_workday(date_to)
+          date_from = ensure_workday(date_from)
+        end
+        days_in = date_to - date_from
+        if @work_on_weekends
+          return days_in
+        end
+        weekends_in = (days_in / 7).floor
+        weekends_in += 1 if date_to.cwday < date_from.cwday
+        work_days = days_in - (weekends_in * 2)
+        work_days
+      end
+
       private
 
       def coordinates(start_date, end_date, progress, zoom=nil)
@@ -642,25 +675,27 @@ module Redmine
         coords = {}
         if start_date && end_date && start_date < self.date_to && end_date > self.date_from
           if start_date > self.date_from
-            coords[:start] = start_date - self.date_from
-            coords[:bar_start] = start_date - self.date_from
+            coords[:start] = work_days_in(start_date, self.date_from)
+            coords[:bar_start] = work_days_in(start_date, self.date_from)
           else
             coords[:bar_start] = 0
           end
           if end_date < self.date_to
-            coords[:end] = end_date - self.date_from
-            coords[:bar_end] = end_date - self.date_from + 1
+            coords[:end] = work_days_in(end_date, self.date_from)
+            coords[:bar_end] = work_days_in(end_date, self.date_from) + 1
           else
-            coords[:bar_end] = self.date_to - self.date_from + 1
+            coords[:bar_end] = work_days_in(self.date_to, self.date_from) + 1
           end
 
           if progress
-            progress_date = start_date + (end_date - start_date + 1) * (progress / 100.0)
+            workdays = work_days_in(end_date, start_date) + 1
+            progress_days = workdays * (progress / 100.0)
+            progress_date = date_for_workdays(start_date, progress_days)
             if progress_date > self.date_from && progress_date > start_date
               if progress_date < self.date_to
-                coords[:bar_progress_end] = progress_date - self.date_from
+                coords[:bar_progress_end] = work_days_in(progress_date, self.date_from)
               else
-                coords[:bar_progress_end] = self.date_to - self.date_from + 1
+                coords[:bar_progress_end] = work_days_in(self.date_to, self.date_from) + 1
               end
             end
 
@@ -668,9 +703,9 @@ module Redmine
               late_date = [Date.today, end_date].min
               if late_date > self.date_from && late_date > start_date
                 if late_date < self.date_to
-                  coords[:bar_late_end] = late_date - self.date_from + 1
+                  coords[:bar_late_end] = work_days_in(late_date, self.date_from) + 1
                 else
-                  coords[:bar_late_end] = self.date_to - self.date_from + 1
+                  coords[:bar_late_end] = work_days_in(self.date_to, self.date_from) + 1
                 end
               end
             end
@@ -684,6 +719,33 @@ module Redmine
         coords
       end
 
+      # Get the end date for a given start date and duration of workdays.
+      # If the number of workdays is 0, the result is equal to the start date.
+      # If the number of workdays is 1, the result is equal to the next workday 
+      # that follows the start date.
+      def date_for_workdays(date_from, workdays)
+        if @work_on_weekends
+          return date_from + workdays
+        end
+        days_in = date_from + workdays
+        workdays_in_week = @work_on_weekends ? 7 : 5
+        weekends = (workdays / workdays_in_week).floor
+        date_to = date_from + workdays + (weekends * 2) # candidate result (might end on a weekend)
+        weekends += 1 if date_to.cwday >= 6
+        weekends += 1 if date_to.cwday < date_from.cwday
+        date_to = date_from + workdays + (weekends * 2) # final result
+        date_to
+      end
+      
+      # Ensure that the date falls on a workday. If the given date falls on a
+      # weekend, it is moved to the following Monday.
+      def ensure_workday(date)
+        if !@work_on_weekends
+          date += 8 - date.cwday if date.cwday >= 6
+        end
+        date
+      end
+      
       # Sorts a collection of issues by start_date, due_date, id for gantt rendering
       def sort_issues!(issues)
         issues.sort! { |a, b| gantt_issue_compare(a, b, issues) }
@@ -745,7 +807,7 @@ module Redmine
         style << "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
         style << "font-style:italic;" if options[:external]
 
-        output = view.content_tag 'div', subject, :class => options[:css], :style => style, :title => options[:title]
+        output = view.content_tag 'div', subject.html_safe, :class => options[:css], :style => style, :title => options[:title]
         @subjects << output
         output
       end
@@ -770,6 +832,8 @@ module Redmine
       end
 
       def html_task(params, coords, options={})
+		top = (params[:top] + 4).to_s
+	    text_top = (params[:top] + 1).to_s
         output = ''
         # Renders the task bar, with progress and late
         
@@ -786,31 +850,31 @@ module Redmine
         
         if coords[:bar_start] && coords[:bar_end]
           if options[:issue]
-            output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
+            output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           else
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"            
+            output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           end
           
           if coords[:bar_late_end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_late_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_late'>&nbsp;</div>"
+            output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_late_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_late'>&nbsp;</div>"
           end
           if coords[:bar_progress_end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_progress_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_done'>&nbsp;</div>"
+            output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_progress_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_done'>&nbsp;</div>"
           end
         end
 
         # Renders the markers
         if options[:markers]
           if coords[:start]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:start] }px;width:15px;' class='#{options[:css]} marker starting'>&nbsp;</div>"
+            output << "<div style='top:#{ top }px;left:#{ coords[:start] }px;width:15px;' class='#{options[:css]} marker starting'>&nbsp;</div>"
           end
           if coords[:end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:end] + params[:zoom] }px;width:15px;' class='#{options[:css]} marker ending'>&nbsp;</div>"
+            output << "<div style='top:#{ top }px;left:#{ coords[:end] + params[:zoom] }px;width:15px;' class='#{options[:css]} marker ending'>&nbsp;</div>"
           end
         end
         # Renders the label on the right
         if options[:label]
-          output << "<div style='top:#{ params[:top] }px;left:#{ (coords[:bar_end] || 0) + 8 }px;' class='#{options[:css]} label'>"
+          output << "<div style='top:#{ text_top }px;left:#{ (coords[:bar_end] || 0) + 8 }px;' class='#{options[:css]} label'>"
           output << options[:label]
           output << "</div>"
         end
