@@ -35,7 +35,7 @@ module RedmineBetterGanttChart
         reschedule_parents
         ordered_changes = prepare_and_sort_changes_list(@changes)
 
-        Issue.with_all_callbacks_disabled do
+        Issue.skip_callbacks do
           transaction do
             ordered_changes.each do |the_changes|
               issue_id, changes = the_changes[1]
