@@ -22,10 +22,10 @@ Redmine::Plugin.register :redmine_better_gantt_chart do
   name 'Redmine Better Gantt Chart plugin'
   author 'Alexey Kuleshov'
   description 'This plugin improves Redmine Gantt Chart'
-  version '0.7.0'
+  version '0.9.0'
   url 'https://github.com/kulesa/redmine_better_gantt_chart'
   author_url 'http://github.com/kulesa'
-  
+
   requires_redmine :version_or_higher => '1.1.0'
 
   settings(:default => {
