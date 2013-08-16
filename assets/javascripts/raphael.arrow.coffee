@@ -2,7 +2,7 @@
 This plugin draws arrows on Redmine gantt chart.
 ###
 
-# Draws an arrow 
+# Draws an arrow
 # Original here: http://taitems.tumblr.com/post/549973287/drawing-arrows-in-raphaeljs
 Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
   # Strokes for relation types
@@ -11,7 +11,7 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
     "duplicated": "- "
     "blocked": "-"
     "relates": "."
-  
+
   # Shorthand functions for formatting SVG commands
   cmd = (cmd, a...) ->  cmd.concat(" ", a.join(" "), " ")
   M = (x, y) -> cmd("M", x, y)
@@ -30,13 +30,13 @@ Raphael.fn.ganttArrow = (coords, relationType = "follows") ->
   x1 += 3
 
   arrow = @set()
-  
+
   deltaX = 7
   deltaY = 8
-  
+
   [x2, y2] = [x1 + deltaX - 3, y1]
   [x5, y5] = [x6 - deltaX, y6]
-  
+
   if y1 < y6
     [x3, y3] = [x2, y6 - deltaY]
   else
@@ -63,11 +63,11 @@ window.redrawGanttArrows = () ->
   paper.clear
   window.paper = paper
   paper.canvas.style.position = "absolute"
-  paper.canvas.style.zIndex = "50"
+  paper.canvas.style.zIndex = "24"
 
   # Relation attributes
   relationAttrs = ["follows", "blocked", "duplicated", "relates"]
-  
+
   # Calculates arrow coordinates
   calculateAnchors = (from, to) ->
     [fromOffsetX, fromOffsetY] = [from.position().left, from.position().top]
