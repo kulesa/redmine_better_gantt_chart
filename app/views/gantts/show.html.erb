@@ -171,7 +171,7 @@
                   @gantt.params.merge(:year => year),
                   :title => "#{year}" %>
     <% end %>
-    <% 
+    <%
       left = left + width + 1
     %>
   <% end %>
@@ -276,8 +276,8 @@
         style += "height: #{height}px;"
         style += "text-align:center;"
         style += "font-size:0.7em;"
-        style += 'background:#f1f1f1;' if (@gantt.work_on_weekends && wday > 5)
-        style += 'border-left: 1px solid #c6c6c6;' if (!@gantt.work_on_weekends && wday == 1)
+        style += 'background:#f1f1f1;' if (@gantt.work_on_weekends && day.cwday > 5)
+        style += 'border-left: 1px solid #c6c6c6;' if (!@gantt.work_on_weekends && day.cwday == 1)
       %>
       <%= content_tag(:div, :style => style, :class => "gantt_hdr") do %>
         <%= day_letter(wday) %>
