@@ -1,0 +1,10 @@
+# German strings go here for Rails i18n
+de:
+  field_duration: "Bearbeitungsdauer"
+  work_on_weekends_label: "Arbeit an Wochenenden"
+  smart_sorting_label: "Smart sorting"
+  task_moved_journal_entry: "Grund: Änderung an zugehörigem Ticket"
+  label_enabled: "Aktiviert"
+  label_disabled: "Deaktiviert"
+  description_enabled: "Eine Woche hat 7 Arbeitstage. Bei automatischen Terminänderungen können Beginn und Abgabedatum auf ein Wochenende fallen. Die Bearbeitungsdauer schließt Wochendenden ein."
+  description_disabled: "Eine Woche hat 5 Arbeitstage. Fällt Beginn oder Abgabedatum bei automatischen Terminänderungen auf ein Wochenende wird es auf den folgenden Montag verschoben. Hinweis: Unabhängig von dieser Einstellung kann Beginn und Abgabedatum immer manuell auf ein Wochende gesetzt werden."
