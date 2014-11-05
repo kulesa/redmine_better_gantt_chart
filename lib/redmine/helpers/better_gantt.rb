@@ -58,7 +58,7 @@ module Redmine
         zoom = (options[:zoom] || User.current.pref[:gantt_zoom]).to_i
         @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
         months = (options[:months] || User.current.pref[:gantt_months]).to_i
-        @months = (months > 0 && months < 25) ? months : 6
+        @months = (months > 0 && months < 100) ? months : 48
         @work_on_weekends = RedmineBetterGanttChart.work_on_weekends?
         work_on_weekends = @work_on_weekends
 
@@ -414,7 +414,7 @@ module Redmine
 
         subject_width = 400
         header_height = 18
-	line_height = 18
+        line_height = 18
         # width of one day in pixels
         zoom = @zoom*2
         g_width = (work_days_in(@date_to, @date_from) + 1)*zoom
@@ -714,7 +714,7 @@ module Redmine
 
         # Transforms dates into pixels witdh
         coords.keys.each do |key|
-          coords[key] = (coords[key] * zoom).floor
+          coords[key] = (coords[key] * zoom * 0.5).floor
         end
         coords
       end
