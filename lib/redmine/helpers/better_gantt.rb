@@ -58,7 +58,7 @@ module Redmine
         zoom = (options[:zoom] || User.current.pref[:gantt_zoom]).to_i
         @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
         months = (options[:months] || User.current.pref[:gantt_months]).to_i
-        @months = (months > 0 && months < 100) ? months : 48
+        @months = (months > 0 && months < 100) ? months : 6
         @work_on_weekends = RedmineBetterGanttChart.work_on_weekends?
         work_on_weekends = @work_on_weekends
 
