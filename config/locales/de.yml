@@ -3,7 +3,7 @@ de:
   field_duration: "Bearbeitungsdauer"
   work_on_weekends_label: "Arbeit an Wochenenden"
   smart_sorting_label: "Smart sorting"
-  task_moved_journal_entry: "Grund: Änderung an zugehörigem Ticket"
+  task_moved_journal_entry: "Grund: Änderung an zugehörigem Ticket: #%{id}"
   label_enabled: "Aktiviert"
   label_disabled: "Deaktiviert"
   description_enabled: "Eine Woche hat 7 Arbeitstage. Bei automatischen Terminänderungen können Beginn und Abgabedatum auf ein Wochenende fallen. Die Bearbeitungsdauer schließt Wochendenden ein."
