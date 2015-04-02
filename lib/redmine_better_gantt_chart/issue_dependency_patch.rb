@@ -59,7 +59,7 @@ module RedmineBetterGanttChart
           changes.delete(key) if issue.send(key) == value.to_date
         end
         unless changes.empty?
-          issue.init_journal(User.current, I18n.t('task_moved_journal_entry'))
+          issue.init_journal(User.current, I18n.t('task_moved_journal_entry', id: self.id ) )
           issue.update_attributes(changes)
           issue.create_journal_entry
         end

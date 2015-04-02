@@ -3,7 +3,7 @@ fr:
   field_duration: "Durée"
   work_on_weekends_label: "Travail le week-end"
   smart_sorting_label: "Classement intelligent"
-  task_moved_journal_entry: "en raison d'un changement dans une tâche liée"
+  task_moved_journal_entry: "en raison d'un changement dans une tâche liée: #%{id}"
   label_enabled: "Activé"
   label_disabled: "Désactivé"
   description_enabled: "une semaine a 7 jours ouvrés. Les demandes peuvent commencer et finir les weekends lors des réordonnancements automatiques. Les durées des demandes incluent les weekends."

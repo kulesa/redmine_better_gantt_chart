@@ -3,7 +3,7 @@ pt-BR:
   field_duration: "Duração"
   work_on_weekends_label: "Trabalho em fins de semana"
   smart_sorting_label: "Ordenação inteligente"
-  task_moved_journal_entry: "devido a mudanças em uma tarefa relacionada"
+  task_moved_journal_entry: "devido a mudanças em uma tarefa relacionada: #%{id}"
   label_enabled: "Ligado"
   label_disabled: "Desligado"
   description_enabled: "uma semana tem 7 dias uteis. Casos podem iniciar e terminar em fins de semana quando reagendados automaticamente. Duração dos casos inclui fins de semana."

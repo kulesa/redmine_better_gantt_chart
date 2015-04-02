@@ -3,7 +3,7 @@ en:
   field_duration: "Duration"
   work_on_weekends_label: "Work on weekends"
   smart_sorting_label: "Smart sorting"
-  task_moved_journal_entry: "due to changes in a related task"
+  task_moved_journal_entry: "due to changes in a related task: #%{id}"
   label_enabled: "Enabled"
   label_disabled: "Disabled"
   description_enabled: "a week has 7 working days. Issues can start and finish on weekends when automatically rescheduled. Issue duration includes weekends."
