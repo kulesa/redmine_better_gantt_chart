@@ -1,8 +1,8 @@
-require 'active_support/basic_object'
+require 'active_support/proxy_object'
 
 module RedmineBetterGanttChart
   module ActiveRecord
-    class WithoutCallbacks < ActiveSupport::BasicObject
+    class WithoutCallbacks < ActiveSupport::ProxyObject
       def initialize(target, types)
         @target = target
         @types  = types
@@ -19,7 +19,7 @@ module RedmineBetterGanttChart
       end
     end
 
-    module CallbackExtensionsForRails3
+    module CallbackExtensionsForRails4
       extend ActiveSupport::Concern
 
       module ClassMethods
