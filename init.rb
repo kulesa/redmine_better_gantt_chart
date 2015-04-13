@@ -1,12 +1,20 @@
 require 'redmine'
 require 'dispatcher' unless Rails::VERSION::MAJOR >= 3
 
-if Rails::VERSION::MAJOR >= 3
+if Rails::VERSION::MAJOR >= 4
   ActionDispatch::Callbacks.to_prepare do
     require_dependency 'redmine_better_gantt_chart/patches'
 
     unless ActiveRecord::Base.included_modules.include?(RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails4)
       ActiveRecord::Base.send(:include, RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails4)
+    end
+  end
+elsif Rails::VERSION::MAJOR >= 3
+  ActionDispatch::Callbacks.to_prepare do
+    require_dependency 'redmine_better_gantt_chart/patches'
+
+    unless ActiveRecord::Base.included_modules.include?(RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails3)
+      ActiveRecord::Base.send(:include, RedmineBetterGanttChart::ActiveRecord::CallbackExtensionsForRails3)
     end
   end
 else
