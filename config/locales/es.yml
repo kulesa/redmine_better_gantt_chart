@@ -7,4 +7,4 @@ es:
   label_enabled: "Activado"
   label_disabled: "Desactivado"
   description_enabled: "una semana tiene 7 días laborables. Las peticiones pueden empezar y acabar en fines de semana cuando se replanifica automáticamente. La duración de las peticiones incluye los fines de semana."
-  description_disabled: "una semana tiene 5 días laborables. Si la fecha de inicio o fin cae en fin de semana cuando la petición se replanifica automáticamente, se mueve al Lunes siguiente. Si se planificar la fecha de inicio o fin manualmente se pueden establecer fechas en fin de semana.
+  description_disabled: "una semana tiene 5 días laborables. Si la fecha de inicio o fin cae en fin de semana cuando la petición se replanifica automáticamente, se mueve al Lunes siguiente. Si se planificar la fecha de inicio o fin manualmente se pueden establecer fechas en fin de semana."
