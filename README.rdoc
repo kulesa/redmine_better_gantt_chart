@@ -46,7 +46,7 @@ By default issues on the chart sorted  uses improved  algorythm. However you can
 
 === Rescheduling
 
-Changing due date of an issue causes rescheduling of related issues. By default, any day of week is a working day, and new start and dure dates can fall on weekends as well as on other days. To change this,
+Changing due date of an issue causes rescheduling of related issues. By default, any day of week is a working day, and new start and due dates can fall on weekends as well as on other days. To change this,
 go to plugin settings and disable *Work on weekends* checkbox. This will turn on support of working days. So far only normal weekends supported; you need manually change dates falling on holidays.
 
 New setting *Work on weekends* introduced in v.0.6.
