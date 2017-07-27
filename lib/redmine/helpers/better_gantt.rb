@@ -51,8 +51,17 @@ module Redmine
             @month_from = 1
           end
         else
-          @month_from ||= Date.today.month
-          @year_from ||= Date.today.year
+        # Old
+        # @month_from ||= Date.today.month
+        # @year_from ||= Date.today.year
+        # New: TanNB edit default start month, back to 3 months from current month.
+          if Date.today.month <= 3
+            @month_from ||= Date.today.month + 9
+            @year_from ||= Date.today.year - 1
+          else
+            @month_from ||= Date.today.month - 3
+            @year_from ||= Date.today.year
+          end
         end
 
         zoom = (options[:zoom] || User.current.pref[:gantt_zoom]).to_i
@@ -425,6 +434,7 @@ module Redmine
         imgl = Magick::ImageList.new
         imgl.new_image(subject_width+g_width+1, height)
         gc = Magick::Draw.new
+        gc.font = Redmine::Configuration['rmagick_font_path'] || ""
 
         # Subjects
         gc.stroke('transparent')
