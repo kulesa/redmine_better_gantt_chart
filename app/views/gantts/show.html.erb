@@ -125,14 +125,14 @@
 <% if Date.today >= @gantt.date_from and Date.today <= @gantt.date_to %>
   <%
     width =  zoom
-    today_left = (((@gantt.work_days_in(Date.today, @gantt.date_from) + 0) * zoom).floor() - 1).to_i
+    today_left = (((@gantt.work_days_in(Date.today, @gantt.date_from) + 0) * zoom * 0.5).floor() - 1).to_i
     style  = ""
     style += "position: absolute;"
     style += "height: #{headers_height + g_height}px;"
     style += "top: 0px;"
     style += "left: #{today_left}px;"
     style += "width: #{width}px;"
-    #style += "border-left: 1px dashed red;"
+    style += "border-left: 1px dashed red;"
     style += 'background:#ffe3e3;'
   %>
   <%= content_tag(:div, '&nbsp;'.html_safe, :style => style) %>
@@ -160,7 +160,7 @@
         work_days = @gantt.work_days_in(Date.new(year + 1), Date.new(year))
         months_remaining -= 12
       end
-      width = (work_days * zoom - 1).to_i
+      width = (work_days * zoom * 0.5 - 1).to_i
       style  = ""
       style += "left: #{left}px;"
       style += "width: #{width}px;"
@@ -185,7 +185,7 @@
 %>
 <% @gantt.months.times do %>
   <%
-    width = (@gantt.work_days_in(month_f >> 1, month_f) * zoom - 1).to_i
+    width = (@gantt.work_days_in(month_f >> 1, month_f) * zoom * 0.5 - 1).to_i
     style  = ""
     style += "top: #{header_heigth+1}px;" if show_years
     style += "left: #{left}px;"
@@ -223,7 +223,7 @@
     <%
       # find next monday after @date_from
       week_f = @gantt.date_from + (7 - @gantt.date_from.cwday + 1)
-      width = (work_days_in_week - @gantt.date_from.cwday + 1) * zoom - 1
+      width = (work_days_in_week - @gantt.date_from.cwday + 1) * zoom * 0.5 - 1
       style  = ""
       style += "left: #{left}px;"
       style += "top: #{header_heigth+1}px;"
@@ -267,7 +267,7 @@
   <% (@gantt.date_from).upto(@gantt.date_to) do |day| %>
     <% if (day.cwday <= work_days_in_week) %>
       <%
-        width =  zoom - 1
+        width =  zoom * 0.5 - 1
         day_abbr = [:"zh", :"zh-TW"].include?(current_language) ? day_name(wday)[6,3] : day_name(wday).first # correct abbreviation of day of week for Chinese language
         style  = ""
         style += "left: #{left}px;"
